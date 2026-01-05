@@ -58,6 +58,11 @@ export const parseK6Data = (raw) => {
     // This represents *any* request failure under load
     failureRateUnderTest,
 
+    // Frontend compatibility helpers (Flattened)
+    p50: http["p(50)"] ?? http.med ?? 0,
+    p95: http["p(95)"] ?? 0,
+    errorRate: `${(failureRateUnderTest * 100).toFixed(2)}%`,
+
     vus: vus.value ?? vus.max ?? 0,
     duration: raw.state?.testRunDurationMs ?? null,
   };
@@ -113,6 +118,20 @@ export const buildChartResponse = (metrics) => {
       },
     ],
   };
+};
+
+/* ===========================
+   PIE CHART FORMATTER (Health)
+   =========================== */
+export const buildPieChartData = (metrics) => {
+  const failRate = metrics.failureRateUnderTest || 0;
+  const successRate = 1 - failRate;
+
+  return [
+    { name: "Successful Responses (2xx)", value: Number((successRate * 100).toFixed(2)), color: "#2563eb" },
+    { name: "Failed Requests (Blocked / Rejected / 5xx)", value: Number((failRate * 100).toFixed(2)), color: "#f59e0b" },
+    { name: "Server Errors (5xx)", value: 0, color: "#ef4444" }, // Detailed split requires more k6 tags
+  ];
 };
 
 /* ===========================

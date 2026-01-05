@@ -9,10 +9,9 @@ const testSessionSchema = new mongoose.Schema({
     url: String,
     metrics: mongoose.Schema.Types.Mixed, // Stores parsed k6 metrics
     charts: mongoose.Schema.Types.Mixed,  // Stores chart data
+    healthData: mongoose.Schema.Types.Mixed, // Stores pie chart health distribution
     github: mongoose.Schema.Types.Mixed,  // Stores GitHub analysis
-    ai: {
-        message: String
-    },
+    ai: mongoose.Schema.Types.Mixed,      // Stores flexible AI output (message, verdict, etc)
     chatHistory: [{
         role: String,
         content: String,

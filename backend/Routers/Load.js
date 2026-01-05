@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import { runK6Test } from "../Runners/k6runner.js";
-import { parseK6Data, buildChartResponse } from "../Utils/Loaddata.js";
+import { parseK6Data, buildChartResponse, buildPieChartData } from "../Utils/Loaddata.js";
 import { analyzeGithubRepo } from "../Utils/githubAnalyzer.js";
 import getresponseopenrouter from "../Utils/openrouter.js";
 import { checkCreditsOrSub } from "../Middleware/authMiddleware.js";
@@ -13,8 +13,6 @@ const router = express.Router();
 router.post("/", checkCreditsOrSub, async (req, res) => {
   try {
     const { testURL, githubRepo } = req.body;
-    console.log(`🚀 Running Load Test for: ${testURL || githubRepo}`);
-    console.log(`📦 GitHub Repo provided: ${githubRepo || 'NONE'}`);
 
     if (!testURL && !githubRepo) {
       return res.status(400).json({ error: "Provide testURL or githubRepo" });
@@ -29,27 +27,54 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
     const isDemoMode = process.env.EXECUTION_MODE === "demo" || process.env.NODE_ENV === "production";
 
     if (isDemoMode) {
-      console.log("🛠️ ENV: Demo Mode detected. Bypassing restricted binary execution (k6/git)...");
+      console.log("🛠️ ENV: Demo Mode. Bypassing binaries.");
 
-      // 1. Simulate K6 Metrics
+      // 1. Simulate K6 Metrics (Nested to match real k6 output)
       const mockLatency = 120 + Math.random() * 200; // 120-320ms
       const mockFailRate = Math.random() > 0.85 ? 0.04 + Math.random() * 0.08 : 0;
+      const mockTotalReqs = 450;
+
       testResult = {
         metrics: {
-          http_req_duration: { avg: mockLatency, med: mockLatency * 0.9, "p(95)": mockLatency * 1.4, "p(99)": mockLatency * 2, max: mockLatency * 3 },
-          http_reqs: { count: 450, rate: 15 },
-          http_req_failed: { value: mockFailRate },
-          vus: { value: 10, max: 10 }
+          http_req_duration: {
+            values: {
+              avg: mockLatency,
+              med: mockLatency * 0.9,
+              "p(95)": mockLatency * 1.4,
+              "p(99)": mockLatency * 2,
+              max: mockLatency * 3
+            }
+          },
+          http_reqs: {
+            values: {
+              count: mockTotalReqs,
+              rate: mockTotalReqs / 30
+            }
+          },
+          http_req_failed: {
+            values: {
+              rate: mockFailRate,
+              passes: Math.floor(mockTotalReqs * (1 - mockFailRate)),
+              fails: Math.floor(mockTotalReqs * mockFailRate)
+            }
+          },
+          vus: {
+            values: {
+              value: 10,
+              max: 10
+            }
+          }
         },
         state: { testRunDurationMs: 30000 }
       };
 
-      // 2. Simulate GitHub Signals
+      // 2. Simulate GitHub Signals (Determine framework from URL)
+      const isNext = testURL?.includes("vercel") || testURL?.includes("next");
       githubResult = {
-        framework: "Express",
+        framework: isNext ? "Next.js" : "Express",
         hasStartScript: true,
-        database: "MongoDB",
-        dependencyCount: 24,
+        database: isNext ? "PostgreSQL (Prisma)" : "MongoDB",
+        dependencyCount: isNext ? 42 : 24,
         docker: { present: true, hasCMD: true, exposesPort: true },
         kubernetes: { present: Math.random() > 0.5, type: "raw" },
         cicd: { present: true },
@@ -57,7 +82,7 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
         summary: { productionReady: true, devOpsScore: 85, riskLevel: "low" }
       };
 
-      // Adding the same logic for score/risk that real scan does
+      // Recalculate score for consistency
       githubResult.summary.devOpsScore =
         (githubResult.docker.present ? 30 : 0) +
         (githubResult.cicd.present ? 30 : 0) +
@@ -91,11 +116,13 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
 
     let metrics = null;
     let charts = null;
+    let healthData = null;
     let github = githubResult;
 
     if (testResult) {
       metrics = parseK6Data(testResult);
       charts = buildChartResponse(metrics);
+      healthData = buildPieChartData(metrics);
     }
 
     if (github && github.summary) {
@@ -256,19 +283,23 @@ Production inference — Not evaluated
     const aiResponseMsg = aiResponse.message;
 
     // Create new session in DB
-    console.log("💾 SAVING METRICS TO DB:", JSON.stringify(metrics, null, 2));
-    const newSession = new TestSession({
+    const session = new TestSession({
       user: req.user._id,
       url: testURL || githubRepo,
       metrics,
       charts,
+      healthData,
       github,
-      ai: aiResponse,
+      ai: {
+        message: aiResponse.message,
+        verdict: aiResponse.verdict,
+        confidence: aiResponse.confidence
+      },
       chatHistory: [{ role: "bot", content: aiResponseMsg }]
     });
 
-    await newSession.save();
-    const sessionId = newSession._id.toString();
+    await session.save();
+    const sessionId = session._id.toString();
 
     // Save as last session for this user
     try {
@@ -324,9 +355,10 @@ router.get("/latest", async (req, res) => {
       url: session.url,
       metrics: session.metrics,
       charts: session.charts,
+      healthData: session.healthData,
       github: session.github,
       ai: session.ai,
-      aiVerdict: "Passed" // Defaulting as before
+      aiVerdict: session.ai?.verdict || "Passed"
     });
   } catch (err) {
     console.error("❌ Get Latest Test Error:", err);
