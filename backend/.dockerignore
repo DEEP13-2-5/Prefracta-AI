@@ -1,0 +1,8 @@
+node_modules
+npm-debug.log
+.DS_Store
+.git
+.env
+signup_res.json
+test_output.json
+verify_flow.js
