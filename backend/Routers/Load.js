@@ -6,6 +6,8 @@ import { analyzeGithubRepo } from "../Utils/githubAnalyzer.js";
 import getresponseopenrouter from "../Utils/openrouter.js";
 import { checkCreditsOrSub } from "../Middleware/authMiddleware.js";
 import TestSession from "../Models/TestSession.js";
+import fetch from "node-fetch"; // Ensure this is available or use native fetch
+
 
 const router = express.Router();
 
@@ -29,28 +31,45 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
     if (isDemoMode) {
       console.log("🛠️ ENV: Demo Mode. Bypassing binaries.");
 
+      // --- SMART CONNECTIVITY CHECK ---
+      let isUp = true;
+      let mockFailRate = 0;
+
+      try {
+        if (testURL) {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3500);
+          const check = await fetch(testURL, {
+            method: 'HEAD',
+            signal: controller.signal,
+            headers: { 'User-Agent': 'SynthMind-Connectivity-Check/1.0' }
+          }).catch(() => ({ ok: false }));
+          clearTimeout(timeoutId);
+          isUp = check.ok;
+        }
+      } catch (e) {
+        isUp = false;
+      }
+
+      if (!isUp) {
+        console.log("⚠️ Target URL appears down. Forcing 100% failure in simulation.");
+        mockFailRate = 1.0;
+      } else {
+        mockFailRate = Math.random() > 0.85 ? 0.04 + Math.random() * 0.08 : 0;
+      }
+
       // 1. Simulate K6 Metrics (Nested to match real k6 output)
-      const mockLatency = 120 + Math.random() * 200; // 120-320ms
-      const mockFailRate = Math.random() > 0.85 ? 0.04 + Math.random() * 0.08 : 0;
+      const mockLatency = isUp ? (120 + Math.random() * 200) : 5000;
       const mockTotalReqs = 450;
 
       testResult = {
         metrics: {
           http_req_duration: {
             values: {
-              avg: mockLatency,
-              med: mockLatency * 0.9,
-              "p(95)": mockLatency * 1.4,
-              "p(99)": mockLatency * 2,
-              max: mockLatency * 3
+              avg: mockLatency, med: mockLatency * 0.9, "p(95)": mockLatency * 1.4, "p(99)": mockLatency * 2, max: mockLatency * 3
             }
           },
-          http_reqs: {
-            values: {
-              count: mockTotalReqs,
-              rate: mockTotalReqs / 30
-            }
-          },
+          http_reqs: { values: { count: mockTotalReqs, rate: mockTotalReqs / 30 } },
           http_req_failed: {
             values: {
               rate: mockFailRate,
@@ -58,38 +77,37 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
               fails: Math.floor(mockTotalReqs * mockFailRate)
             }
           },
-          vus: {
-            values: {
-              value: 10,
-              max: 10
-            }
-          }
+          vus: { values: { value: 10, max: 10 } }
         },
         state: { testRunDurationMs: 30000 }
       };
 
-      // 2. Simulate GitHub Signals (Determine framework from URL)
-      const isNext = testURL?.includes("vercel") || testURL?.includes("next");
-      githubResult = {
-        framework: isNext ? "Next.js" : "Express",
-        hasStartScript: true,
-        database: isNext ? "PostgreSQL (Prisma)" : "MongoDB",
-        dependencyCount: isNext ? 42 : 24,
-        docker: { present: true, hasCMD: true, exposesPort: true },
-        kubernetes: { present: Math.random() > 0.5, type: "raw" },
-        cicd: { present: true },
-        issues: [],
-        summary: { productionReady: true, devOpsScore: 85, riskLevel: "low" }
-      };
+      // 2. Simulate GitHub Signals (ONLY IF REPO PROVIDED)
+      if (githubRepo) {
+        const isNext = testURL?.includes("vercel") || testURL?.includes("next") || githubRepo.toLowerCase().includes("next");
+        githubResult = {
+          framework: isNext ? "Next.js" : "Express",
+          hasStartScript: true,
+          database: isNext ? "PostgreSQL (Prisma)" : "MongoDB",
+          dependencyCount: isNext ? 42 : 24,
+          docker: { present: true, hasCMD: true, exposesPort: true },
+          kubernetes: { present: Math.random() > 0.5, type: "raw" },
+          cicd: { present: true },
+          issues: [],
+          summary: { productionReady: true, devOpsScore: 85, riskLevel: "low" }
+        };
 
-      // Recalculate score for consistency
-      githubResult.summary.devOpsScore =
-        (githubResult.docker.present ? 30 : 0) +
-        (githubResult.cicd.present ? 30 : 0) +
-        (githubResult.kubernetes.present ? 20 : 0) +
-        (githubResult.hasStartScript ? 20 : 0);
+        // Recalculate score for consistency
+        githubResult.summary.devOpsScore =
+          (githubResult.docker.present ? 30 : 0) +
+          (githubResult.cicd.present ? 30 : 0) +
+          (githubResult.kubernetes.present ? 20 : 0) +
+          (githubResult.hasStartScript ? 20 : 0);
+      } else {
+        githubResult = null;
+      }
 
-      console.log("✅ Simulated metrics ready for SynthMind Audit.");
+      console.log("✅ Smart Simulation ready.");
     } else {
       // REAL MODE: Only runs if explicitly configured (e.g., Local Dev)
       console.log("⚡ ENV: Real Mode. Executing k6 and GitHub analysis...");
