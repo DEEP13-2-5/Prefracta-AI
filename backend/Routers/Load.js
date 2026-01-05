@@ -15,6 +15,7 @@ const router = express.Router();
 router.post("/", checkCreditsOrSub, async (req, res) => {
   try {
     const { testURL, githubRepo } = req.body;
+    console.log(`📥 [Request Body] URL: "${testURL}", Repo: "${githubRepo}"`);
 
     if (!testURL && !githubRepo) {
       return res.status(400).json({ error: "Provide testURL or githubRepo" });
@@ -203,13 +204,13 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
     // SYNTHMIND AI — LIVE AUDIT AGENTIC MODE
     // -------------------------------------------------------------------------
     /**
-  * Live Audit Agentic AI
-  * Purpose:
-  * - Interpret runtime telemetry
-  * - Decide stability / instability
-  * - NO fixes, NO scaling, NO advice
-  * - Designed for pre-launch readiness & audit clarity
-  */
+    * Live Audit Agentic AI
+    * Purpose:
+    * - Interpret runtime telemetry
+    * - Decide stability / instability
+    * - NO fixes, NO scaling, NO advice
+    * - Designed for pre-launch readiness & audit clarity
+    */
 
     const runLiveAuditAI = async ({
       metrics,
