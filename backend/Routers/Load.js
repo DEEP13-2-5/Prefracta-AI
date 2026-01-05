@@ -431,7 +431,7 @@ router.get("/:id", async (req, res) => {
       charts: session.charts,
       github: session.github,
       ai: session.ai,
-      aiVerdict: "Passed"
+      aiVerdict: session.ai?.verdict || "Passed"
     });
   } catch (err) {
     console.error("❌ Get Test Error:", err);
