@@ -22,11 +22,12 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
 
     console.log("⏱ Starting synchronized analysis (K6 + GitHub)...");
 
-    // Run both in parallel to save time and avoid timeouts
+    let k6Error = null;
     const [testResult, githubResult] = await Promise.all([
       testURL
         ? runK6Test(testURL, { vus: 100, duration: "5s" }).catch(e => {
           console.error("⚠️ K6 Test Failed:", e);
+          k6Error = e.message;
           return null;
         })
         : Promise.resolve(null),
@@ -45,17 +46,7 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
     let github = githubResult;
 
     if (testResult) {
-      console.log("📊 Raw K6 Result keys:", Object.keys(testResult));
-      if (testResult.metrics) {
-        console.log("📊 K6 Metrics keys:", Object.keys(testResult.metrics));
-        // Log a sample metric to verify structure
-        console.log("📊 Sample http_reqs:", JSON.stringify(testResult.metrics.http_reqs, null, 2));
-      } else {
-        console.warn("⚠️ K6 Result invalid: No metrics found");
-      }
-
       metrics = parseK6Data(testResult);
-      console.log("✅ Parsed Metrics:", JSON.stringify(metrics, null, 2));
       charts = buildChartResponse(metrics);
     }
 
@@ -126,6 +117,7 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
 
     const runLiveAuditAI = async ({
       metrics,
+      error,
       context,
       getresponseopenrouter
     }) => {
@@ -134,7 +126,7 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
       if (!metrics) {
         return {
           message:
-            "Load Test & Analysis Failed: The k6 performance engine could not collect metrics. This usually means the target URL is unreachable or the server environment is not configured correctly for load testing."
+            "SynthMind AI could not retrieve metrics for this test. Please ensure the target URL is valid and try again."
         };
       }
 
@@ -209,6 +201,7 @@ Production inference — Not evaluated
     // --- EXECUTE AI ANALYSIS ---
     const aiResponse = await runLiveAuditAI({
       metrics,
+      error: k6Error,
       context,
       getresponseopenrouter
     });
