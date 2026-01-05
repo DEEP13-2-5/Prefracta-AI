@@ -12,7 +12,7 @@ import os from "os";
  */
 export const runK6Test = (
   testURL,
-  { vus = 100, duration = "30s", forceSimulation = false } = {}
+  { vus = 200, duration = "5s", forceSimulation = false } = {}
 ) => {
   return new Promise((resolve, reject) => {
     // --- DEMO MODE / SIMULATION LOGIC ---
