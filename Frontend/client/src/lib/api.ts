@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://syncmind-ai.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://apnavideo.onrender.com/api';
 
 const getHeaders = (token?: string) => {
     const headers: any = { 'Content-Type': 'application/json' };
