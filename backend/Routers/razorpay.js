@@ -6,9 +6,17 @@ import { verifyToken } from "../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
+const RAZORPAY_KEY = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_ID.trim() !== ""
+    ? process.env.RAZORPAY_KEY_ID
+    : "rzp_test_dummy_key";
+
+const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET && process.env.RAZORPAY_KEY_SECRET.trim() !== ""
+    ? process.env.RAZORPAY_KEY_SECRET
+    : "dummy_secret";
+
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_dummy_key",
-    key_secret: process.env.RAZORPAY_KEY_SECRET || "dummy_secret",
+    key_id: RAZORPAY_KEY,
+    key_secret: RAZORPAY_SECRET,
 });
 
 // PLANS (Static for now, could be in DB)
@@ -40,7 +48,7 @@ router.post("/create-sub", async (req, res) => {
             orderId: order.id,
             amount: order.amount,
             currency: order.currency,
-            razorpayKeyId: process.env.RAZORPAY_KEY_ID || "rzp_test_dummy_key"
+            razorpayKeyId: RAZORPAY_KEY
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
