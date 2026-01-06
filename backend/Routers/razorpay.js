@@ -6,17 +6,21 @@ import { verifyToken } from "../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
-const RAZORPAY_KEY = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_ID.trim() !== ""
-    ? process.env.RAZORPAY_KEY_ID
-    : "rzp_test_dummy_key";
+// Helper to get keys with safe fallbacks
+const getRazorpayKeys = () => {
+    const keyId = (process.env.RAZORPAY_KEY_ID || "").trim();
+    const keySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim();
 
-const RAZORPAY_SECRET = process.env.RAZORPAY_KEY_SECRET && process.env.RAZORPAY_KEY_SECRET.trim() !== ""
-    ? process.env.RAZORPAY_KEY_SECRET
-    : "dummy_secret";
+    const finalKeyId = keyId !== "" ? keyId : "rzp_test_dummy_key";
+    const finalKeySecret = keySecret !== "" ? keySecret : "dummy_secret";
 
+    return { finalKeyId, finalKeySecret };
+};
+
+const { finalKeyId: initKey, finalKeySecret: initSecret } = getRazorpayKeys();
 const razorpay = new Razorpay({
-    key_id: RAZORPAY_KEY,
-    key_secret: RAZORPAY_SECRET,
+    key_id: initKey,
+    key_secret: initSecret,
 });
 
 // PLANS (Static for now, could be in DB)
@@ -43,12 +47,17 @@ router.post("/create-sub", async (req, res) => {
             },
         };
 
+        const { finalKeyId } = getRazorpayKeys();
         const order = await razorpay.orders.create(options);
+
+        console.log(`💳 Payment Order Created: ${order.id} for user ${req.user._id}`);
+        console.log(`🔑 Sending Razorpay Key to Frontend: ${finalKeyId.substring(0, 10)}...`);
+
         res.json({
             orderId: order.id,
             amount: order.amount,
             currency: order.currency,
-            razorpayKeyId: RAZORPAY_KEY
+            razorpayKeyId: finalKeyId
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -62,10 +71,11 @@ router.post("/verify-payment", async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, planType } = req.body;
 
+        const { finalKeySecret } = getRazorpayKeys();
         const body = razorpay_order_id + "|" + razorpay_payment_id;
 
         const expectedSignature = crypto
-            .createHmac("sha256", RAZORPAY_SECRET)
+            .createHmac("sha256", finalKeySecret)
             .update(body.toString())
             .digest("hex");
 

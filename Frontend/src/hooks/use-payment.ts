@@ -42,6 +42,7 @@ export function useCreateSubscription() {
       return result;
     },
     onSuccess: (data, planType) => {
+      console.log("💰 Subscription Initialization Data:", data);
       if (!window.Razorpay) {
         toast({ title: "System Error", description: "Razorpay SDK not loaded", variant: "destructive" });
         return;
