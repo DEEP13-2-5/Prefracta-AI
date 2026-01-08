@@ -592,7 +592,10 @@ export function StrategicRemediations({ remediations }: { remediations?: string[
     return (
         <Card className="border-primary/20 bg-primary/5 h-full">
             <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-primary">Strategic Growth Accelerators</CardTitle>
+                <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-primary flex items-center justify-between">
+                    <span>Strategic Growth Accelerators</span>
+                    <span className="text-[8px] opacity-30">v4.0</span>
+                </CardTitle>
                 <CardDescription className="text-xs">Immediate technical unlocks to increase throughput and revenue</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 pt-2">

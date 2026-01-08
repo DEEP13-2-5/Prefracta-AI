@@ -165,8 +165,8 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
       // --- DYNAMIC STRATEGIC REMEDIATIONS ---
       const rems = [];
       const phrases = {
-        lat: ["Enable CDN Edge Caching", "Implement Global Edge Acceleration", "Optimize Regional Traffic Routing"],
-        thr: ["Implement Redis Layer", "Add Connection Pooling", "Scale Horizontal Nodes"],
+        lat: ["[V4] FORCE Edge Acceleration", "[V4] Optimize Global CDN Path", "[V4] Deploy Regional Latency Shields"],
+        thr: ["[V4] Activate High-Throughput Redis", "[V4] Scale Compute Partitioning", "[V4] Enable Burst-Mode Capacity"],
         err: ["Auto-Scale Infrastructure", "Configure Health Check Retries", "Deploy Zero-Downtime Patching"],
         dev: ["Enforce CI/CD Pipeline", "Hardcode Automation Workflows", "Setup Automated Rollback"]
       };
