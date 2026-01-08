@@ -481,3 +481,129 @@ export function SummaryMatrixTable({ metrics, github }: { metrics?: any, github?
         </Card>
     );
 }
+
+export function CollapsePointChart({ metrics, business }: { metrics?: any, business?: any }) {
+    if (!metrics || !business) return null;
+
+    const currentVUs = metrics.vus || 200;
+    const collapsePoint = business.collapsePoint || 300;
+    const isWarning = currentVUs >= collapsePoint * 0.8;
+
+    // Generate trend data leading up to collapse
+    const chartData = [
+        { name: 'Stable', load: 0, status: 'Normal' },
+        { name: 'Active', load: currentVUs * 0.5, status: 'Normal' },
+        { name: 'High Load', load: currentVUs, status: isWarning ? 'Risk' : 'Normal' },
+        { name: 'Breaking', load: collapsePoint, status: 'Collapse' },
+    ];
+
+    return (
+        <Card className="border-2 border-primary/20 bg-background/50 backdrop-blur-sm">
+            <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <CardTitle className="text-xl font-bold text-red-500">Architecture Collapse Point</CardTitle>
+                        <CardDescription>Predictive breaking point based on current heap/latency telemetry</CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="h-[250px] w-full mt-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                            <defs>
+                                <linearGradient id="colorLoad" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                                    <stop offset="70%" stopColor="#3b82f6" stopOpacity={0.8} />
+                                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0.8} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                            <XAxis
+                                dataKey="name"
+                                axisLine={false}
+                                tickLine={false}
+                                tick={{ fontSize: 12, fill: '#888' }}
+                            />
+                            <YAxis hide />
+                            <Tooltip
+                                content={({ active, payload }) => {
+                                    if (active && payload && payload.length) {
+                                        return (
+                                            <div className="bg-background border border-primary/20 p-3 rounded-lg shadow-xl">
+                                                <p className="text-sm font-bold text-primary">{payload[0].payload.name}</p>
+                                                <p className="text-2xl font-black">{Math.round(payload[0].value)} VUs</p>
+                                                <p className={`text-xs mt-1 ${payload[0].payload.status === 'Collapse' ? 'text-red-500 font-bold uppercase' : 'text-muted-foreground'}`}>
+                                                    {payload[0].payload.status === 'Collapse' ? '🔥 CRITICAL LIMIT' : 'SYSTEM STATUS: STABLE'}
+                                                </p>
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                }}
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="load"
+                                stroke="#ef4444"
+                                strokeWidth={4}
+                                fillOpacity={1}
+                                fill="url(#colorLoad)"
+                                animationDuration={2000}
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+                <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                            <Activity className="w-6 h-6 text-red-500" />
+                        </div>
+                        <div>
+                            <p className="text-xs uppercase tracking-widest font-bold text-red-500">Brutal Verdict</p>
+                            <p className="text-sm font-medium">Your stack will fundamentally fail at <span className="font-black text-lg text-red-500">{collapsePoint} Users/Sec</span>. Beyond this, hardware saturation causes permanent service blackout.</p>
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+export function BusinessImpactCards({ business }: { business?: any }) {
+    if (!business) return null;
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="bg-blue-500/5 border-blue-500/20 overflow-hidden transform hover:scale-[1.02] transition-all">
+                <CardHeader className="p-4 pb-0">
+                    <CardDescription className="text-xs font-bold uppercase tracking-wider text-blue-400">Revenue Leakage</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-2">
+                    <div className="text-3xl font-black text-blue-500">{business.conversionLoss}% Churn</div>
+                    <p className="text-xs text-muted-foreground mt-1">Direct conversion loss for every 1s of latency detected.</p>
+                </CardContent>
+            </Card>
+
+            <Card className="bg-orange-500/5 border-orange-500/20 overflow-hidden transform hover:scale-[1.02] transition-all">
+                <CardHeader className="p-4 pb-0">
+                    <CardDescription className="text-xs font-bold uppercase tracking-wider text-orange-400">Marketing Exposure</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-2">
+                    <div className="text-3xl font-black text-orange-500">₹{business.adSpendRisk} / Day</div>
+                    <p className="text-xs text-muted-foreground mt-1">Predicted ad budget wasted due to failed landing requests.</p>
+                </CardContent>
+            </Card>
+
+            <Card className="bg-emerald-500/5 border-emerald-500/20 overflow-hidden transform hover:scale-[1.02] transition-all">
+                <CardHeader className="p-4 pb-0">
+                    <CardDescription className="text-xs font-bold uppercase tracking-wider text-emerald-400">Strategic Stability Score</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-2">
+                    <div className="text-3xl font-black text-emerald-500">{Math.round(business.stabilityRiskScore)} / 100</div>
+                    <p className="text-xs text-muted-foreground mt-1">Overall readiness score for a public viral launch.</p>
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
