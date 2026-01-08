@@ -193,13 +193,6 @@ export default function Dashboard() {
           </Card>
         ) : (
           <>
-            {/* BUSINESS INSIGHTS (REVENUE/MARKETING) */}
-            {business && (
-              <div className="space-y-6">
-                <BusinessImpactCards business={business} />
-              </div>
-            )}
-
             {/* STRATEGIC OVERALL VIEW: SCORE + ACCELERATORS */}
             <div className="grid lg:grid-cols-2 gap-8">
               <SystemHealthChart
