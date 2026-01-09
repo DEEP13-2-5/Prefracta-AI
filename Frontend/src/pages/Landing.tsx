@@ -25,7 +25,7 @@ export default function Landing() {
             </div>
             <span className="text-2xl font-black font-display tracking-tight text-gradient">SynthMind AI</span>
           </div>
-          
+
           <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-muted-foreground">
             <a href="#features" className="hover:text-primary transition-all hover:scale-105">Features</a>
             <Link href="/pricing"><span className="hover:text-primary transition-all hover:scale-105 cursor-pointer">Pricing</span></Link>
@@ -66,13 +66,13 @@ export default function Landing() {
           <h1 className="text-5xl md:text-8xl font-black font-display tracking-tighter mb-6 leading-[0.9] lg:leading-[1.1]">
             DevOps <span className="text-gradient">Launch Readiness</span>
           </h1>
-          
+
           <h2 className="text-2xl md:text-4xl font-bold text-foreground/80 mb-8 font-display">
             Measured by Data. <span className="text-primary italic">Explained by AI.</span>
           </h2>
 
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed font-medium">
-            Generate real performance and deployment signals, then get clear 
+            Generate real performance and deployment signals, then get clear
             explanations only when you need them. No more guessing production stability.
           </p>
 
@@ -82,14 +82,6 @@ export default function Landing() {
                 Launch Your First Test <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <div className="flex -space-x-3 overflow-hidden">
-               {[1,2,3,4].map(i => (
-                 <img key={i} className="inline-block h-10 w-10 rounded-full ring-2 ring-background" src={`https://i.pravatar.cc/150?u=${i}`} alt="" />
-               ))}
-               <div className="flex items-center justify-center h-10 px-3 bg-muted rounded-full ring-2 ring-background text-xs font-bold">
-                 +2k
-               </div>
-            </div>
           </div>
 
           <div className="mt-24 relative mx-auto max-w-6xl">
@@ -107,9 +99,9 @@ export default function Landing() {
                   <p className="text-2xl font-bold text-white">99.9% Success Rate</p>
                 </div>
                 <div className="flex gap-2">
-                   <div className="h-2 w-12 bg-primary rounded-full" />
-                   <div className="h-2 w-12 bg-primary/30 rounded-full" />
-                   <div className="h-2 w-12 bg-primary/30 rounded-full" />
+                  <div className="h-2 w-12 bg-primary rounded-full" />
+                  <div className="h-2 w-12 bg-primary/30 rounded-full" />
+                  <div className="h-2 w-12 bg-primary/30 rounded-full" />
                 </div>
               </div>
             </div>
@@ -120,7 +112,7 @@ export default function Landing() {
         <section id="features" className="py-32 relative overflow-hidden bg-slate-50/50 dark:bg-black/20">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mb-20">
-              <h2 className="text-4xl md:text-5xl font-black font-display mb-6">Built for High-Growth <br/><span className="text-primary">Engineering Teams</span></h2>
+              <h2 className="text-4xl md:text-5xl font-black font-display mb-6">Built for High-Growth <br /><span className="text-primary">Engineering Teams</span></h2>
               <p className="text-xl text-muted-foreground font-medium">We've automated the most tedious parts of DevOps so you can focus on building.</p>
             </div>
 
@@ -163,7 +155,7 @@ export default function Landing() {
             <div className="relative rounded-[3rem] overflow-hidden bg-slate-900 p-12 md:p-24 text-center">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20" />
               <div className="relative z-10">
-                <h2 className="text-4xl md:text-6xl font-black text-white mb-8">Ready to ship with <br/><span className="text-primary">Confidence?</span></h2>
+                <h2 className="text-4xl md:text-6xl font-black text-white mb-8">Ready to ship with <br /><span className="text-primary">Confidence?</span></h2>
                 <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12">Join 200+ teams who use SynthMind AI to verify their infrastructure daily.</p>
                 <Link href="/signup">
                   <Button size="lg" className="rounded-full px-12 h-16 text-xl font-bold bg-white text-slate-900 hover:bg-slate-100 shadow-2xl">
@@ -188,7 +180,7 @@ export default function Landing() {
               Empowering DevOps teams with AI-driven performance insights and deployment readiness.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-12">
             <div>
               <h4 className="font-bold mb-4 uppercase text-xs tracking-widest text-foreground/50">Product</h4>
