@@ -89,7 +89,7 @@ export default function Landing() {
             <div className="relative rounded-2xl border border-white/10 shadow-2xl overflow-hidden glass-card">
               <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10" />
               <img
-                src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2670"
+                src="/dashboard-hero.png"
                 alt="SynthMind AI Dashboard"
                 className="w-full h-auto opacity-90 hover:scale-[1.02] transition-transform duration-700"
               />
