@@ -45,15 +45,33 @@ export const checkCreditsOrSub = async (req, res, next) => {
     try {
         const user = req.user;
 
-        // 1. Check if subscription is valid
+        // 1. Check if subscription is valid and NOT expired
         if (user.subscription.plan !== "free" && user.subscription.expiry) {
-            if (new Date() < new Date(user.subscription.expiry)) {
-                if (req.originalUrl.includes("load-test") || req.originalUrl.includes("github-test")) {
-                    user.totalTests = (user.totalTests || 0) + 1;
-                    await user.save();
-                }
-                return next();
+            const now = new Date();
+            const expiryDate = new Date(user.subscription.expiry);
+
+            // Calculate days left
+            const daysLeft = Math.max(0, Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+
+            // If subscription expired (0 days or past expiry date)
+            if (daysLeft === 0 || now >= expiryDate) {
+                // Reset to free plan
+                user.subscription.plan = "free";
+                user.subscription.expiry = null;
+                await user.save();
+
+                return res.status(403).json({
+                    error: "Subscription expired. Please renew to continue.",
+                    expired: true
+                });
             }
+
+            // Subscription is still active
+            if (req.originalUrl.includes("load-test") || req.originalUrl.includes("github-test")) {
+                user.totalTests = (user.totalTests || 0) + 1;
+                await user.save();
+            }
+            return next();
         }
 
         // 2. If 'free' or expired, check credits

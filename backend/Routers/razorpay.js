@@ -11,6 +11,8 @@ const getRazorpayKeys = () => {
     const keyId = (process.env.RAZORPAY_KEY_ID || "").trim();
     const keySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim();
 
+    console.log(`📋 Env Check: RAZORPAY_KEY_ID=${keyId ? 'YES' : 'NO'}, RAZORPAY_KEY_SECRET=${keySecret ? 'YES' : 'NO'}`);
+
     // Use test keys if env vars are missing
     const finalKeyId = keyId !== "" ? keyId : "rzp_test_dummy_key";
     const finalKeySecret = keySecret !== "" ? keySecret : "dummy_secret";
@@ -38,7 +40,11 @@ router.post("/create-sub", async (req, res) => {
 
         const { finalKeyId, finalKeySecret } = getRazorpayKeys();
 
-        console.log(`🔑 Initializing Razorpay with Key: ${finalKeyId.substring(0, 10)}...`);
+        console.log(`💳 Initializing Razorpay: ID=${finalKeyId.substring(0, 8)}... SECRET=${finalKeySecret ? 'PRESENT' : 'MISSING'}`);
+        if (!finalKeySecret || finalKeySecret === "dummy_secret") {
+            console.warn("⚠️ WARNING: Using dummy or missing Razorpay Secret!");
+        }
+
         const razorpay = new Razorpay({
             key_id: finalKeyId,
             key_secret: finalKeySecret,
@@ -66,8 +72,9 @@ router.post("/create-sub", async (req, res) => {
             razorpayKeyId: finalKeyId
         });
     } catch (err) {
-        console.error("❌ Razorpay Order Creation Error:", err.message);
-        res.status(500).json({ error: err.message });
+        console.error("❌ Razorpay Order Creation Error Details:", err);
+        console.error("❌ Razorpay Response Body:", err.response);
+        res.status(500).json({ error: err.description || err.message || "Razorpay Order Creation Failed" });
     }
 });
 

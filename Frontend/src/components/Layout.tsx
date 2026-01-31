@@ -32,7 +32,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b bg-card">
-        <span className="text-xl font-bold font-display text-primary">SynthMind AI</span>
+        <span className="text-xl font-bold font-display text-primary">Prefracta AI</span>
         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X /> : <Menu />}
         </Button>
@@ -47,8 +47,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       >
         <div className="p-6">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <img src="/logo.png" alt="SynthMind AI" className="w-12 h-12 rounded-lg" />
-            <span className="text-xl font-bold font-display">SynthMind AI</span>
+            <img src="/logo.png" alt="Prefracta AI" className="w-12 h-12 rounded-lg" />
+            <span className="text-xl font-bold font-display">Prefracta AI</span>
           </Link>
         </div>
 
@@ -74,37 +74,52 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-4 border-t border-border">
-          <div className="bg-muted/30 rounded-xl p-4 mb-4">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                <UserIcon size={16} />
+          {user ? (
+            <>
+              <div className="bg-muted/30 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                    <UserIcon size={16} />
+                  </div>
+                  <div className="overflow-hidden">
+                    <p className="text-sm font-medium truncate">{user.username}</p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {user.subscription.plan} Plan
+                      {user.subscription.plan !== 'free' && user.subscription.daysLeft !== undefined && (
+                        <span className="ml-1 text-primary font-bold">({user.subscription.daysLeft}d left)</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+                {user.subscription.plan === 'free' && (
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mt-3">
+                    <span>Credits</span>
+                    <span className="font-bold text-foreground">
+                      {user.credits}
+                    </span>
+                  </div>
+                )}
               </div>
-              <div className="overflow-hidden">
-                <p className="text-sm font-medium truncate">{user?.username}</p>
-                <p className="text-xs text-muted-foreground capitalize">
-                  {user?.subscription.plan} Plan
-                  {user?.subscription.plan !== 'free' && user?.subscription.daysLeft !== undefined && (
-                    <span className="ml-1 text-primary font-bold">({user.subscription.daysLeft}d left)</span>
-                  )}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground mt-3">
-              <span>Credits</span>
-              <span className="font-bold text-foreground">
-                {user?.subscription.plan === 'free' ? user?.credits : 'Unlimited'}
-              </span>
-            </div>
-          </div>
 
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
-            onClick={() => logout()}
-          >
-            <LogOut size={16} />
-            Sign Out
-          </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
+                onClick={() => logout()}
+              >
+                <LogOut size={16} />
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <div className="space-y-2">
+              <Link href="/login">
+                <Button className="w-full" variant="default">Login</Button>
+              </Link>
+              <Link href="/signup">
+                <Button className="w-full" variant="outline">Sign Up</Button>
+              </Link>
+            </div>
+          )}
         </div>
       </aside>
 

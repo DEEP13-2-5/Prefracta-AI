@@ -48,7 +48,7 @@ router.post("/", async (req, res) => {
 
 
     // Build Conversation Context
-    const systemPrompt = "You are Xiomi, an automated Agentic AI developed for reliability testing. You are NOT a Mistral model. If asked 'who are you' or 'which AI are you', you MUST reply: 'I am Xiomi Agentic AI, running on the Xiaomi Mimo V2 Flash engine.' Do NOT mention being a large language model from any other provider. For technical questions, provide actionable engineering solutions. Be concise.";
+    const systemPrompt = "You are Prefracta AI, your Interactive DevOps Assistant. You have access to the full telemetry and architecture data of this test session. Your goal is to help the user understand the results, answer specific questions about the stack, and provide conversational engineering advice. Keep it professional but helpful.";
 
     let metricsContext = `Analyze system at URL: ${session.url}.\n`;
     if (session.metrics) {
@@ -63,10 +63,12 @@ router.post("/", async (req, res) => {
       { role: "system", content: systemPrompt },
       { role: "system", content: "Current System Telemetry: " + metricsContext },
       // Map previous history (limit to last 10 to fit context window if needed)
-      ...(session.chatHistory || []).map(msg => ({
-        role: msg.role === "bot" ? "assistant" : "user", // API expects 'assistant' not 'bot'
-        content: msg.content
-      })),
+      ...(session.chatHistory || [])
+        .filter(msg => !msg.content.includes("returned no content") && !msg.content.includes("unable to analyze"))
+        .map(msg => ({
+          role: msg.role === "bot" ? "assistant" : "user", // API expects 'assistant' not 'bot'
+          content: msg.content
+        })),
       { role: "user", content: message }
     ];
 
@@ -76,10 +78,10 @@ router.post("/", async (req, res) => {
 
     try {
       const aiResponse = await getresponseopenrouter(messages); // Pass full history
-      if (aiResponse) {
+      if (aiResponse && aiResponse.trim().length > 0) {
         reply = aiResponse;
       } else {
-        reply = "AI returned no content. The input data might be insufficient.";
+        reply = "I am currently processing the telemetry data. Prefracta AI is refining its analysis. Please wait.";
       }
     } catch (aiError) {
       console.error("⚠️ OpenRouter API Failed:", aiError);

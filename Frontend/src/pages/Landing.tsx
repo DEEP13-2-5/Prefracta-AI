@@ -8,51 +8,77 @@ import {
     Cpu,
     Zap,
     Activity,
-    Layout,
-    Layers,
+    Code,
+    Terminal,
+    Globe,
+    Lock,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { motion } from "framer-motion";
 
 export default function Landing() {
     const { user } = useAuth();
 
-    return (
-        <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2,
+            },
+        },
+    };
 
-            {/* Background Glow */}
-            <div className="fixed inset-0 pointer-events-none -z-10">
-                <div className="absolute top-[-20%] left-[-20%] w-[40%] h-[40%] bg-primary/10 blur-[140px] rounded-full" />
-                <div className="absolute bottom-[-20%] right-[-20%] w-[40%] h-[40%] bg-accent/10 blur-[140px] rounded-full" />
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 },
+    };
+
+    return (
+        <div className="min-h-screen bg-[#020817] text-slate-50 flex flex-col font-sans selection:bg-primary/30 selection:text-primary-foreground">
+
+            {/* Background Glow Elements */}
+            <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 blur-[120px] rounded-full animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/20 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-primary/5 blur-[160px] rounded-full" />
             </div>
 
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b border-white/10 glass">
-                <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <img src="/logo.png" className="w-10 h-10 rounded-xl" />
-                        <span className="text-2xl font-black text-gradient">SynthMind AI</span>
+            <header className="sticky top-0 z-50 border-b border-white/5 bg-slate-950/50 backdrop-blur-xl">
+                <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-4 group cursor-pointer">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-primary blur-lg opacity-40 group-hover:opacity-100 transition-opacity" />
+                            <img src="/logo.png" className="w-10 h-10 rounded-xl relative border border-white/10" alt="Logo" />
+                        </div>
+                        <span className="text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/60">
+                            Prefracta AI
+                        </span>
                     </div>
 
-                    <nav className="hidden md:flex gap-8 text-sm font-semibold text-muted-foreground">
-                        <a href="#features" className="hover:text-primary">Features</a>
-                        <Link href="/pricing">Pricing</Link>
-                        <Link href="/docs">Docs</Link>
+                    <nav className="hidden md:flex items-center gap-10 text-sm font-medium text-slate-400">
+                        <a href="#features" className="hover:text-primary transition-colors">Platform</a>
+                        <Link href="/pricing" className="hover:text-primary transition-colors">Economics</Link>
+                        <Link href="/docs" className="hover:text-primary transition-colors">Documentation</Link>
                     </nav>
 
-                    <div className="flex gap-3">
+                    <div className="flex items-center gap-4">
                         {user ? (
                             <Link href="/dashboard">
-                                <Button className="rounded-full px-6 font-bold">
-                                    Dashboard <ArrowRight className="ml-2 w-4 h-4" />
+                                <Button className="rounded-full px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-[0_0_20px_rgba(37,99,235,0.4)] transition-all hover:scale-105">
+                                    Launch Console <ArrowRight className="ml-2 w-4 h-4" />
                                 </Button>
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login">
-                                    <Button variant="ghost">Sign In</Button>
+                                <Link href="/login" className="hidden sm:block">
+                                    <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5 rounded-full font-semibold">
+                                        Sign In
+                                    </Button>
                                 </Link>
                                 <Link href="/signup">
-                                    <Button className="rounded-full px-6 font-bold">
+                                    <Button className="rounded-full px-8 bg-white text-slate-950 hover:bg-slate-200 font-bold shadow-xl transition-all hover:scale-105 active:scale-95">
                                         Get Started
                                     </Button>
                                 </Link>
@@ -65,78 +91,182 @@ export default function Landing() {
             {/* MAIN */}
             <main className="flex-1">
 
-                {/* Hero */}
-                <section className="container mx-auto px-4 pt-24 pb-32 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-bold mb-8">
-                        <Zap className="w-4 h-4" />
-                        AI-Powered DevOps Validation
-                    </div>
+                {/* Hero section */}
+                <section className="relative pt-24 pb-32 overflow-hidden">
+                    <div className="container mx-auto px-6 text-center">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-widest mb-10 shadow-[0_0_15px_rgba(37,99,235,0.1)]"
+                        >
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                            </span>
+                            Live: Agentic DevOps Intelligence
+                        </motion.div>
 
-                    <h1 className="text-5xl md:text-8xl font-black tracking-tight mb-6">
-                        DevOps <span className="text-gradient">Launch Readiness</span>
-                    </h1>
+                        <motion.h1
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 }}
+                            className="text-6xl md:text-8xl lg:text-[100px] font-black tracking-tightest leading-[0.95] mb-8"
+                        >
+                            Audit Your Scale <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-b from-blue-400 via-blue-600 to-indigo-700">Before Deployment.</span>
+                        </motion.h1>
 
-                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-                        Measure real traffic behavior, detect deployment risks,
-                        and get AI-clear explanations before users hit production.
-                    </p>
+                        <motion.p
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
+                            className="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto mb-14 font-medium leading-relaxed"
+                        >
+                            The world's first agentic performance audit platform. We don't just show charts;
+                            we tell you <span className="text-white font-bold">why</span> your stack will break and <span className="text-white font-bold">how</span> to fix it.
+                        </motion.p>
 
-                    <Link href="/signup">
-                        <Button size="lg" className="rounded-full px-12 h-16 text-lg font-bold">
-                            Launch Your First Test <ArrowRight className="ml-2 w-5 h-5" />
-                        </Button>
-                    </Link>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            className="flex flex-col sm:flex-row items-center justify-center gap-5"
+                        >
+                            <Link href="/signup">
+                                <Button size="lg" className="rounded-full px-12 h-16 text-lg font-black bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_30px_rgba(37,99,235,0.5)] transition-all hover:scale-105 active:scale-95">
+                                    Start Performance Audit <ArrowRight className="ml-2 w-5 h-5" />
+                                </Button>
+                            </Link>
+                            <Button size="lg" variant="outline" className="rounded-full px-10 h-16 text-lg font-bold border-white/10 hover:bg-white/5 transition-all">
+                                View Demo Audit
+                            </Button>
+                        </motion.div>
 
-                    <div className="mt-24 max-w-6xl mx-auto">
-                        <div className="rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-                            <img src="/dashboard-hero.png" className="w-full" />
-                        </div>
+
                     </div>
                 </section>
 
-                {/* Features */}
-                <section id="features" className="py-32 bg-slate-50/50 dark:bg-black/20">
-                    <div className="container mx-auto px-4">
-                        <h2 className="text-4xl md:text-5xl font-black mb-16">
-                            Built for High-Growth <span className="text-primary">Teams</span>
-                        </h2>
+                {/* Features / Value Props */}
+                <section id="features" className="py-32 relative">
+                    <div className="container mx-auto px-6">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+                            <div className="max-w-2xl">
+                                <div className="text-primary font-black uppercase tracking-widest text-sm mb-4">The Platform</div>
+                                <h2 className="text-4xl md:text-5xl font-black tracking-tighter">
+                                    Engineered for <span className="text-slate-400 italic font-serif">Brutal Reality.</span>
+                                </h2>
+                            </div>
+                            <p className="text-slate-400 max-w-sm font-medium">
+                                Generic load tests lie. Prefracta AI simulates human behavior at massive scale to find your true breaking point.
+                            </p>
+                        </div>
 
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <motion.div
+                            variants={containerVariants}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            className="grid md:grid-cols-3 gap-8"
+                        >
                             {[
                                 {
-                                    icon: BarChart2,
-                                    title: "Load Intelligence",
-                                    desc: "Traffic patterns that reflect real users, not fake spikes.",
+                                    icon: Activity,
+                                    title: "Hyper-Scale Simulation",
+                                    desc: "Generate 1,000,000+ virtual users with geographically distributed pressure from 20+ edge regions.",
+                                    color: "blue",
                                 },
                                 {
                                     icon: Shield,
-                                    title: "GitHub & Docker Audits",
-                                    desc: "CI/CD, Docker, and config risks flagged before deploy.",
+                                    title: "DevOps Integrity Audit",
+                                    desc: "Deep analysis of your Docker, CI/CD, and Kubernetes configs to predict deployment failure before it happens.",
+                                    color: "indigo",
                                 },
                                 {
                                     icon: Cpu,
-                                    title: "AI Explanations",
-                                    desc: "Clear reasoning behind failures — not just charts.",
+                                    title: "Agentic Root Cause",
+                                    desc: "Our LLM-powered engine interprets telemetry in real-time to explain bottlenecks in plain English.",
+                                    color: "emerald",
+                                },
+                                {
+                                    icon: Globe,
+                                    title: "Global Edge Network",
+                                    desc: "Test latency from the exact locations of your customers with millisecond precision.",
+                                    color: "cyan",
+                                },
+                                {
+                                    icon: Lock,
+                                    title: "Security Hardening",
+                                    desc: "Automated vulnerability scanning during load tests to ensure your stack doesn't leak under pressure.",
+                                    color: "amber",
+                                },
+                                {
+                                    icon: Code,
+                                    title: "CI/CD Enforcement",
+                                    desc: "Block merges automatically if your latest commit degrades performance beyond your defined SLOs.",
+                                    color: "rose",
                                 },
                             ].map((f, i) => (
-                                <div
+                                <motion.div
                                     key={i}
-                                    className="p-8 rounded-3xl glass-card border border-white/10"
+                                    variants={itemVariants}
+                                    className="group p-10 rounded-[2.5rem] bg-slate-900/20 border border-white/5 hover:border-white/10 transition-all hover:bg-slate-900/40 relative overflow-hidden"
                                 >
-                                    <f.icon className="w-8 h-8 text-primary mb-6" />
-                                    <h3 className="text-2xl font-bold mb-3">{f.title}</h3>
-                                    <p className="text-muted-foreground">{f.desc}</p>
-                                </div>
+                                    <div className="absolute top-0 right-0 p-8 transform translate-x-4 -translate-y-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                        <f.icon className="w-32 h-32" />
+                                    </div>
+                                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-8 bg-slate-800/50 border border-white/5 transition-transform group-hover:scale-110 group-hover:rotate-3`}>
+                                        <f.icon className="w-7 h-7 text-primary" />
+                                    </div>
+                                    <h3 className="text-2xl font-black mb-4 tracking-tight">{f.title}</h3>
+                                    <p className="text-slate-400 font-medium leading-relaxed">{f.desc}</p>
+                                </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     </div>
                 </section>
+
+
+
+                {/* Final CTA */}
+                <section className="py-32 relative overflow-hidden">
+                    <div className="container mx-auto px-6 text-center relative z-10">
+                        <div className="max-w-4xl mx-auto rounded-[3.5rem] bg-gradient-to-b from-primary/20 to-transparent border border-primary/20 p-16 md:p-24 backdrop-blur-sm">
+                            <h2 className="text-4xl md:text-7xl font-black tracking-tightest leading-none mb-10">
+                                Ready to Ship with <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 italic">Absolute Certainty?</span>
+                            </h2>
+                            <Link href="/signup">
+                                <Button size="lg" className="rounded-full px-12 h-20 text-xl font-black bg-white text-slate-950 hover:bg-slate-200 transition-all hover:scale-105 active:scale-95 shadow-2xl">
+                                    Create Free Audit Account
+                                </Button>
+                            </Link>
+                            <p className="mt-8 text-slate-500 font-medium">Free for up to 500 VUs. No credit card required.</p>
+                        </div>
+                    </div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/5 blur-[120px] rounded-full -z-10" />
+                </section>
+
             </main>
 
             {/* Footer */}
-            <footer className="py-16 border-t border-white/10">
-                <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-                    © 2026 SynthMind AI. All rights reserved.
+            <footer className="py-16 border-t border-white/5 bg-slate-950">
+                <div className="container mx-auto px-6">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div className="flex items-center gap-3">
+                            <img src="/logo.png" className="w-8 h-8 rounded-lg grayscale opacity-50" alt="Logo" />
+                            <span className="text-xl font-black tracking-tighter text-slate-500">Prefracta AI</span>
+                        </div>
+                        <div className="flex gap-10 text-sm font-bold text-slate-500">
+                            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+                            <a href="#" className="hover:text-white transition-colors">Terms</a>
+                            <a href="#" className="hover:text-white transition-colors">Security</a>
+                            <a href="#" className="hover:text-white transition-colors">Status</a>
+                        </div>
+                        <div className="text-slate-600 font-medium text-sm">
+                            © 2026 Prefracta AI Platform. All rights reserved.
+                        </div>
+                    </div>
                 </div>
             </footer>
         </div>

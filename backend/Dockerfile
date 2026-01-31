@@ -1,4 +1,4 @@
-# Production build for SynthMind Backend
+# Production build for Prefracta Backend
 FROM node:20-slim
 
 WORKDIR /app

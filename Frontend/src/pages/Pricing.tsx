@@ -41,7 +41,7 @@ export default function Pricing() {
         {
             id: "monthly",
             name: "Monthly Elite",
-            price: "₹1,999",
+            price: "₹1,499",
             period: "/month",
             description: "For teams scaling production services.",
             features: [
@@ -64,7 +64,7 @@ export default function Pricing() {
             <nav className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
                 <Link href="/">
                     <span className="text-2xl font-bold font-display cursor-pointer bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                        SynthMind AI
+                        Prefracta AI
                     </span>
                 </Link>
                 {!user ? (

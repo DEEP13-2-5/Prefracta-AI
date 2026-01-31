@@ -31,7 +31,7 @@ export default function Signup() {
 
             toast({
                 title: 'Account Created',
-                description: "Welcome to SynthMind AI! You've received 1 free credit.",
+                description: "Welcome to Prefracta AI! You've received 1 free credit.",
             });
 
             setLocation('/dashboard');
@@ -52,7 +52,7 @@ export default function Signup() {
                 <CardHeader className="space-y-1">
                     <CardTitle className="text-2xl font-bold font-display">Create an account</CardTitle>
                     <CardDescription>
-                        Enter your details to start using SynthMind AI.
+                        Enter your details to start using Prefracta AI.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

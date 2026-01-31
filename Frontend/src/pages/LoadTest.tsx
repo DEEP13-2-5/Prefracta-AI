@@ -74,6 +74,36 @@ export default function LoadTest() {
 
   if (!user) return null;
 
+  // Check if subscription expired
+  const isSubscriptionExpired = user.subscription.plan !== 'free' &&
+    user.subscription.daysLeft !== undefined &&
+    user.subscription.daysLeft === 0;
+
+  if (isSubscriptionExpired) {
+    return (
+      <Layout>
+        <div className="max-w-2xl mx-auto py-12">
+          <Card className="border-destructive border-2 bg-destructive/5 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-destructive">Subscription Expired</CardTitle>
+              <CardDescription>
+                Your subscription has ended. Please renew to continue running load tests.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => setLocation('/subscription')}
+                className="w-full h-12 text-base font-semibold"
+              >
+                Renew Subscription
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
+
   if (user.credits === 0 && user.subscription.plan === 'free') {
     return (
       <Layout>

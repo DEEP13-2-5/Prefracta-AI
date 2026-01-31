@@ -42,7 +42,7 @@ export default function LoadTestResult() {
     ];
 
   const metrics = testData.metrics as any || { p50: 0, p95: 0, errorRate: "0%" };
-  const aiMessage = testData.ai?.message || "Xiomi's Audit: Analyzing system telemetry for architectural bottlenecks. Detailed findings will appear shortly.";
+  const aiMessage = testData.ai?.message || "Prefracta AI Strategic Audit: Analyzing system telemetry for architectural bottlenecks. Detailed findings will appear shortly.";
 
   const handleSendChat = (e: React.FormEvent) => {
     e.preventDefault();

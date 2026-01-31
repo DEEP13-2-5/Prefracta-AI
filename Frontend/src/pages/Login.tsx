@@ -38,7 +38,7 @@ export default function Login() {
         <div className="min-h-screen flex items-center justify-center bg-background">
             <Card className="w-full max-w-md shadow-xl border-border/50">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold font-display">Login to SynthMind AI</CardTitle>
+                    <CardTitle className="text-2xl font-bold font-display">Login to Prefracta AI</CardTitle>
                     <CardDescription>
                         Enter your email to access your dashboard.
                     </CardDescription>

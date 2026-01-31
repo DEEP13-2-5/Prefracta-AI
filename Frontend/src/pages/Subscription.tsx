@@ -26,7 +26,7 @@ export default function Subscription() {
     {
       id: "monthly",
       name: "Monthly Elite",
-      price: "₹1,999",
+      price: "₹1,499",
       period: "/month",
       description: "For teams scaling production services.",
       features: [

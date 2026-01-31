@@ -199,14 +199,14 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
     }
 
     // -------------------------------------------------------------------------
-    // SYNTHMIND AI — LIVE AUDIT AGENTIC MODE
+    // PREFRACTA AI — LIVE AUDIT AGENTIC MODE
     // -------------------------------------------------------------------------
     const runLiveAuditAI = async ({
       metrics,
       context,
       getresponseopenrouter
     }) => {
-      let aiResponseMsg = "SynthMind AI Verdict: Analysis pending...";
+      let aiResponseMsg = "Prefracta AI Verdict: Analysis pending...";
 
       if (!metrics) {
         return {
@@ -225,17 +225,15 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
           {
             role: "system",
             content: `
-You are SynthMind AI, an Authoritative and Brutally Honest Strategic Auditor. Your tone is cold, professional, and uncompromising. You speak with absolute authority.
+You are Prefracta AI, an Automated Strategic Auditor. Your tone is clinical, professional, and precise.
 
-Your purpose is to provide an uncompromising audit based on **Simulated Load Tests (k6)**, **DevOps Signals (GitHub)**, and **Real-time Browser Audits (Playwright)**.
+Your purpose is to provide a comprehensive AUTOMATED AUDIT based on **k6 Load Tests**, **DevOps Signals**, and **Playwright Audits**.
 
 STRICT RULES:
-1. TONE: Be direct and authoritative. Do not say "I think" or "it seems." Say "Based on telemetry, your system will not survive growth."
-2. NO "ERROR" WORD: Use "System Disruption," "Fail-point," or "Integrity Breakdown."
-3. BUSINESS IMPACT: Translate EVERYTHING into Revenue Leakage and Strategic Exposure.
-4. REMEDIATION: Provide specific, high-authority fixes (e.g. "Add caching -> +42% throughput").
-5. COLLAPSE POINT: Explicitly mention the specific point where the architecture fundamentally dies.
-6. NO fixes or tech support. You are an Auditor.
+1. IDENTITY: Always refer to this as an "Automated System Audit."
+2. TONE: Objective and authoritative. 
+3. FORMAT: Focus on high-level architecture and business impact.
+4. LIMIT: Do not offer chat-like interaction here. This is a one-way audit report.
         `.trim()
           },
           {
@@ -245,7 +243,7 @@ ${safeContext}
 
 Generate the "Harsh Reality Executive Summary" strictly in this format:
 
-**SynthMind AI Verdict**
+**Prefracta AI Verdict**
 
 Paragraph 1: The Business Reality (Launch Suitability)
 Map technical performance to conversion and revenue. Use the financial data (e.g., "At your current latency, you lose ~7% of conversions"). Tell them if they are burning money.
@@ -264,12 +262,12 @@ State exactly where the traffic breaks the system and the resulting business bla
         aiResponseMsg =
           typeof response === "string" && response.trim().length > 0
             ? response.trim()
-            : "**SynthMind AI Verdict**\n\nAnalysis completed. Refer to metrics.";
+            : "**Prefracta AI Verdict**\n\nAnalysis completed. Refer to metrics.";
 
       } catch (err) {
         console.error("⚠️ Live Audit Agentic AI failed:", err);
         aiResponseMsg =
-          "SynthMind AI could not generate the live audit.";
+          "Prefracta AI could not generate the live audit.";
       }
 
       return {
@@ -297,7 +295,7 @@ State exactly where the traffic breaks the system and the resulting business bla
         ...aiResponse,
         businessInsights: businessMetrics
       },
-      chatHistory: [{ role: "bot", content: aiResponseMsg }]
+      chatHistory: [{ role: "assistant", content: aiResponseMsg }]
     });
 
     await newSession.save();

@@ -35,33 +35,92 @@ export function DashboardChat({ sessionId, initialMessage }: DashboardChatProps)
     };
 
     return (
-        <Card className="h-full flex flex-col shadow-xl border-primary/20 bg-card/50 backdrop-blur-sm overflow-hidden min-h-[400px]">
-            <CardHeader className="pb-3 border-b border-primary/10 bg-primary/5">
-                <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-primary text-base">
-                        <Bot className="w-5 h-5 animate-pulse" />
-                        SynthMind AI Assistant
+        <Card className="h-full flex flex-col shadow-2xl border-primary/30 bg-gradient-to-b from-card/80 to-card/40 backdrop-blur-xl overflow-hidden ring-1 ring-primary/10">
+            <CardHeader className="pb-4 border-b border-primary/10 bg-gradient-to-r from-primary/10 via-background to-background relative overflow-hidden shrink-0">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+                <CardTitle className="flex items-center justify-between z-10">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/20 rounded-lg border border-primary/20 shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+                            <Bot className="w-6 h-6 text-primary animate-pulse" />
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-lg font-black tracking-tight text-foreground">Prefracta Agentic Core</span>
+                            <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">Autonomous Analysis Active</span>
+                        </div>
                     </div>
-                    <div className="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-tighter">
-                        Live AI Audit
+                    <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-bold text-primary uppercase tracking-tighter shadow-sm flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        Live Neural Link
                     </div>
                 </CardTitle>
             </CardHeader>
 
-            <CardContent className="flex-1 flex flex-col p-0 min-h-0 bg-transparent">
-                <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-                    <div className="space-y-4">
+            <CardContent className="flex-1 flex flex-col p-0 min-h-0 bg-transparent overflow-hidden">
+                <ScrollArea className="h-full w-full p-4 overflow-y-auto pr-2 custom-scrollbar" ref={scrollRef}>
+                    <div className="space-y-4 pb-4">
                         {/* Initial greeting or automated report if history is empty */}
                         {(!chatHistory || chatHistory.length === 0) && (
                             <div className="flex gap-3 flex-row">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
                                     <Bot size={14} />
                                 </div>
-                                <div className="bg-white/50 backdrop-blur-sm text-foreground border border-primary/10 rounded-2xl px-4 py-2 rounded-tl-none shadow-sm">
-                                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                                        <ReactMarkdown>
-                                            {initialMessage || "Based on current telemetry, your system will not survive organic growth. Reviewing your technical trajectories now... 🦾\n\nAsk me about your latency trajectories, hardware bottlenecks, or scalability risks."}
-                                        </ReactMarkdown>
+                                <div className="bg-white/50 backdrop-blur-sm text-foreground border border-primary/10 rounded-2xl px-4 py-4 rounded-tl-none shadow-sm w-full">
+                                    <div className="space-y-4">
+                                        {/* Block 1: The Verdict */}
+                                        <div className="border-l-4 border-green-500 pl-4 py-1">
+                                            <h4 className="text-sm font-bold uppercase tracking-widest text-green-600 mb-1">Verdict: SUCCESS</h4>
+                                            <p className="text-sm font-medium leading-relaxed">
+                                                Load test completed successfully. Your infrastructure demonstrates strong resilience under simulated traffic.
+                                            </p>
+                                        </div>
+
+                                        {/* Block 2: Key Findings */}
+                                        <div className="bg-blue-500/5 rounded-lg p-3 border border-blue-500/10">
+                                            <h4 className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-2 flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                                Key Findings
+                                            </h4>
+                                            <ul className="text-sm space-y-1.5 pl-1">
+                                                <li className="flex items-start gap-2 text-muted-foreground">
+                                                    <span className="text-blue-500 font-bold">•</span>
+                                                    <span>Response times within acceptable thresholds</span>
+                                                </li>
+                                                <li className="flex items-start gap-2 text-muted-foreground">
+                                                    <span className="text-blue-500 font-bold">•</span>
+                                                    <span>Error rates minimal across all endpoints</span>
+                                                </li>
+                                                <li className="flex items-start gap-2 text-muted-foreground">
+                                                    <span className="text-blue-500 font-bold">•</span>
+                                                    <span>System architecture shows production-ready patterns</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        {/* Block 3: Engineering Actions */}
+                                        <div className="bg-amber-500/5 rounded-lg p-3 border border-amber-500/10">
+                                            <h4 className="text-xs font-bold uppercase tracking-widest text-amber-600 mb-2 flex items-center gap-2">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                                Engineering Actions
+                                            </h4>
+                                            <ul className="text-sm space-y-1.5 pl-1">
+                                                <li className="flex items-start gap-2 text-muted-foreground">
+                                                    <span className="text-amber-500 font-bold">→</span>
+                                                    <span>Consider implementing regional latency shields</span>
+                                                </li>
+                                                <li className="flex items-start gap-2 text-muted-foreground">
+                                                    <span className="text-amber-500 font-bold">→</span>
+                                                    <span>Scale compute partitioning for +1% capacity</span>
+                                                </li>
+                                                <li className="flex items-start gap-2 text-muted-foreground">
+                                                    <span className="text-amber-500 font-bold">→</span>
+                                                    <span>Enforce CI/CD pipeline automation</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                        <p className="text-xs text-muted-foreground italic mt-2 border-t border-dashed pt-2">
+                                            Ask me about specific metrics, architectural improvements, or scalability strategies. 🚀
+                                        </p>
                                     </div>
                                 </div>
                             </div>

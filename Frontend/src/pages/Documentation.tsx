@@ -32,7 +32,7 @@ export default function Documentation() {
         {
             title: "API Reference",
             icon: Book,
-            content: "Integrate SynthMind AI into your CI/CD pipeline. Use our CLI or Webhooks to trigger load tests automatically on every pull request to catch performance regressions early."
+            content: "Integrate Prefracta AI into your CI/CD pipeline. Use our CLI or Webhooks to trigger load tests automatically on every pull request to catch performance regressions early."
         }
     ];
 
@@ -41,7 +41,7 @@ export default function Documentation() {
             <div className="max-w-5xl mx-auto py-10 px-4">
                 <div className="text-center mb-16">
                     <h1 className="text-4xl font-bold font-display mb-4">Documentation</h1>
-                    <p className="text-xl text-muted-foreground">Everything you need to master SynthMind AI and scale your apps.</p>
+                    <p className="text-xl text-muted-foreground">Everything you need to master Prefracta AI and scale your apps.</p>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-8">
