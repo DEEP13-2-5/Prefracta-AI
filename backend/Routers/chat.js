@@ -7,7 +7,7 @@ import TestSession from "../Models/TestSession.js";
 const router = express.Router();
 
 // GET History
-router.get("/chat/:sessionId", async (req, res) => {
+router.get("/:sessionId", async (req, res) => {
   try {
     const { sessionId } = req.params;
 
@@ -47,15 +47,39 @@ router.post("/", async (req, res) => {
     */
 
 
-    // Build Conversation Context
-    const systemPrompt = "You are Prefracta AI, your Interactive DevOps Assistant. You have access to the full telemetry and architecture data of this test session. Your goal is to help the user understand the results, answer specific questions about the stack, and provide conversational engineering advice. Keep it professional but helpful.";
+    // Build Decision Intelligence Context
+    const systemPrompt = `
+You are the Prefracta Decision Intelligence Agent. Your role is NOT to be a friendly assistant, but a Clinical Strategic Gatekeeper.
 
-    let metricsContext = `Analyze system at URL: ${session.url}.\n`;
+DECISION PROTOCOL:
+1. AUTHORITY: You have the power to "AUTHORIZE" or "BLOCK" deployments.
+2. CRITERIA:
+   - p95 Latency > 200ms = CRITICAL RISK (Analyze conversion loss).
+   - Error Rate > 1% = BLOCK READY.
+   - Missing Docker/CI-CD = ARCHITECTURAL DEBT.
+3. TONE: Authoritative, data-driven, and brief.
+4. BUSINESS ALIGNMENT: Always map technical failures to financial "Ad Spend Risk" and "Conversion Loss".
+
+Do not use fluff. Provide cold, hard engineering directives.
+`.trim();
+
+    let metricsContext = `Environment: ${session.url}\n`;
+
     if (session.metrics) {
-      metricsContext += `Metrics: Latency p95=${session.metrics.latency.p95}ms, Throughput=${session.metrics.throughput}req/s, ErrorRate=${(session.metrics.errorRate * 100).toFixed(2)}%.\n`;
+      metricsContext += `[RUNTIME] Latency p95: ${session.metrics.latency?.p95}ms, Throughput: ${session.metrics.throughput}req/s, Errors: ${(session.metrics.errorRate * 100).toFixed(2)}%.\n`;
     }
+
+    if (session.ai?.businessInsights) {
+      const bi = session.ai.businessInsights;
+      metricsContext += `[BUSINESS] Conversion Loss: ${bi.conversionLoss}%, Ad Spend Risk: ₹${bi.adSpendRisk}, Stability Score: ${bi.stabilityRiskScore}/100.\n`;
+    }
+
     if (session.github) {
-      metricsContext += `Architecture: DevOps Score=${session.github.summary.devOpsScore}/100, Docker=${session.github.docker.present}, CI/CD=${session.github.cicd.present}.\n`;
+      metricsContext += `[DEVOPS] Score: ${session.github.summary?.devOpsScore}/100, Docker: ${session.github.docker?.present}, CI/CD: ${session.github.cicd?.present}.\n`;
+    }
+
+    if (session.browserMetrics) {
+      metricsContext += `[QUALITY] Performance: ${session.browserMetrics.performance}/100, Best Practices: ${session.browserMetrics.bestPractices}/100.\n`;
     }
 
     // Construct full message history for AI

@@ -160,7 +160,17 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
       };
 
       businessMetrics.stabilityRiskScore = Math.round((pPerf + pArch + pDev) / 3);
-      businessMetrics.collapsePoint = Math.round(metrics.vus * (metrics.failureRateUnderTest > 0.05 ? 0.9 : 1.8));
+
+      // Calculate Collapse Point based on Throughput (standardized to req/s)
+      // Formula: Current Throughput adjusted by failure rate and safety margin
+      const throughput = metrics.throughput || 0;
+      const failRate = metrics.failureRateUnderTest || 0;
+
+      // If it's healthy, we assume it can handle 1.5x current load. If failing, it's already collapsed.
+      businessMetrics.collapsePoint = Math.round(throughput * (failRate > 0.05 ? 0.8 : 1.5));
+
+      // Ensure a logical floor (min 5 req/s if throughput was recorded)
+      if (throughput > 0) businessMetrics.collapsePoint = Math.max(5, businessMetrics.collapsePoint);
 
       // --- DYNAMIC STRATEGIC REMEDIATIONS ---
       const rems = [];
@@ -245,14 +255,16 @@ Generate the "Harsh Reality Executive Summary" strictly in this format:
 
 **Prefracta AI Verdict**
 
-Paragraph 1: The Business Reality (Launch Suitability)
+[The Business Reality]
 Map technical performance to conversion and revenue. Use the financial data (e.g., "At your current latency, you lose ~7% of conversions"). Tell them if they are burning money.
 
-Paragraph 2: The Actionable Remediation (Strategic Gains)
+[The Actionable Remediation]
 Provide specific technical fixes that lead to business gains. Format as: "Add [Feature] -> [Business Benefit]".
 
-Paragraph 3: The Collapse Point (Architectural Failure)
+[The Collapse Point]
 State exactly where the traffic breaks the system and the resulting business blackout.
+
+STRICT REPRODUCTION RULE: Do NOT include labels like "Paragraph 1", "Paragraph 2", or "Paragraph 3" in your output. Just provide the text.
         `.trim()
           }
         ];

@@ -20,6 +20,7 @@ import {
 import { useEffect, useRef, useState, useMemo } from "react";
 import { api } from "@/lib/api";
 import { DashboardChat } from "@/components/DashboardChat";
+import { useLoadTest } from "@/hooks/use-load-test";
 import {
   SystemHealthChart,
   ThroughputChart,
@@ -39,24 +40,8 @@ export default function Dashboard() {
   const params = useParams();
   const activeTab = params.tab || "overview";
 
-  const [latestData, setLatestData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { data: latestData, isLoading: isDataLoading, refetch } = useLoadTest("latest");
   const chatRef = useRef<HTMLDivElement>(null);
-
-  /* ---------------- FETCH LATEST TEST ---------------- */
-  const fetchData = () => {
-    if (!token) return;
-    setIsLoading(true);
-    api.getLatestLoadTest(token)
-      .then(setLatestData)
-      .catch(err => console.error("Error fetching latest test:", err))
-      .finally(() => setIsLoading(false));
-  };
-
-  useEffect(() => {
-    if (!user || !token) return;
-    fetchData();
-  }, [user?.totalTests, token]);
 
   if (!user) return <Redirect to="/" />;
 
@@ -296,7 +281,16 @@ export default function Dashboard() {
           </div>
 
           <div className="flex items-center gap-3">
-            {isLoading && <Loader2 className="w-5 h-5 animate-spin text-primary" />}
+            <Button
+              variant="outline"
+              size="lg"
+              className="gap-2 rounded-full font-bold border-slate-200 hover:bg-slate-100"
+              onClick={() => refetch()}
+              disabled={isDataLoading}
+            >
+              <RefreshCw className={cn("w-4 h-4", isDataLoading && "animate-spin")} />
+              Sync State
+            </Button>
             <Button size="lg" className="gap-2 rounded-full font-bold shadow-lg shadow-primary/20" onClick={() => setLocation("/load-test")}>
               <Plus className="w-5 h-5" />
               New Load Test

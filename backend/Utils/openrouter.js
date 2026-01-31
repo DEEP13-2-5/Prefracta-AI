@@ -23,7 +23,7 @@ const getresponseopenrouter = async (messages) => {
     // Try each model until one works
     for (const model of freeModels) {
       try {
-        console.log(`🔄 Trying model: ${model}`);
+        // console.log(`🔄 Trying model: ${model}`);
 
         const response = await fetch(
           "https://openrouter.ai/api/v1/chat/completions",

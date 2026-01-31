@@ -529,15 +529,15 @@ export function SummaryMatrixTable({ metrics, github }: { metrics?: any, github?
 export function CollapsePointChart({ metrics, business }: { metrics?: any, business?: any }) {
     if (!metrics || !business) return null;
 
-    const currentVUs = metrics.vus || 200;
-    const collapsePoint = business.collapsePoint || 300;
-    const isWarning = currentVUs >= collapsePoint * 0.8;
+    const currentThroughput = metrics.throughput || 0;
+    const collapsePoint = business.collapsePoint || 0;
+    const isWarning = currentThroughput >= collapsePoint * 0.8;
 
     // Generate trend data leading up to collapse
     const chartData = [
         { name: 'Stable', load: 0, status: 'Normal' },
-        { name: 'Active', load: currentVUs * 0.5, status: 'Normal' },
-        { name: 'High Load', load: currentVUs, status: isWarning ? 'Risk' : 'Normal' },
+        { name: 'Active', load: currentThroughput * 0.5, status: 'Normal' },
+        { name: 'High Load', load: currentThroughput, status: isWarning ? 'Risk' : 'Normal' },
         { name: 'Breaking', load: collapsePoint, status: 'Collapse' },
     ];
 
@@ -576,7 +576,7 @@ export function CollapsePointChart({ metrics, business }: { metrics?: any, busin
                                         return (
                                             <div className="bg-background border border-primary/20 p-3 rounded-lg shadow-xl">
                                                 <p className="text-sm font-bold text-primary">{payload[0].payload.name}</p>
-                                                <p className="text-2xl font-black">{Math.round(Number(payload[0].value || 0))} VUs</p>
+                                                <p className="text-2xl font-black">{Math.round(Number(payload[0].value || 0))} Reqs/s</p>
                                                 <p className={`text-xs mt-1 ${payload[0].payload.status === 'Collapse' ? 'text-red-500 font-bold uppercase' : 'text-muted-foreground'}`}>
                                                     {payload[0].payload.status === 'Collapse' ? '🔥 CRITICAL LIMIT' : 'SYSTEM STATUS: STABLE'}
                                                 </p>
@@ -605,7 +605,7 @@ export function CollapsePointChart({ metrics, business }: { metrics?: any, busin
                         </div>
                         <div>
                             <p className="text-xs uppercase tracking-widest font-bold text-red-500">Brutal Verdict</p>
-                            <p className="text-sm font-medium">Your stack will fundamentally fail at <span className="font-black text-lg text-red-500">{collapsePoint} Users/Sec</span>. Beyond this, hardware saturation causes permanent service blackout.</p>
+                            <p className="text-sm font-medium">Your stack will fundamentally fail at <span className="font-black text-lg text-red-500">{collapsePoint} Reqs/Sec</span>. Beyond this, hardware saturation causes permanent service blackout.</p>
                         </div>
                     </div>
                 </div>
@@ -679,10 +679,11 @@ export function BusinessImpactCards({ business, metrics, remediations }: { busin
     // DYNAMIC CALCULATIONS FOR PEAK TRAFFIC CARD
     // All values derived from real k6 metrics - NO FAKEUPS
     const getCapacityMetrics = () => {
-        if (!metrics) return { burstLimit: 0, globalReach: 0, userCapacity: 0 };
+        if (!metrics) return { burstLimit: 0, globalReach: 0, userCapacity: 0, currentThroughput: 0 };
 
-        // 1. Throughput to Users (Approx 1 request per second per active user)
-        const userCapacity = Math.round((metrics.throughput || 0) * 1.5);
+        const currentThroughput = metrics.throughput || 0;
+        // 1. Peak Capacity: Directly correlates to the estimated architectural collapse point
+        const userCapacity = business.collapsePoint || Math.round(currentThroughput * 1.5); // This is the collapse point
 
         // 2. Burst Limit: How much MORE can we handle?
         // If p95 is low (e.g. 100ms), we have huge room (90%+). If p95 is high (800ms), room is low.
@@ -696,7 +697,7 @@ export function BusinessImpactCards({ business, metrics, remediations }: { busin
         // Formula: 100 - (latency / 8)
         const globalReach = Math.max(20, Math.min(100, 100 - (p95 / 8)));
 
-        return { userCapacity, burstLimit, globalReach };
+        return { userCapacity, burstLimit, globalReach, currentThroughput };
     };
 
     const capacity = getCapacityMetrics();
@@ -761,7 +762,7 @@ export function BusinessImpactCards({ business, metrics, remediations }: { busin
                         <div className="text-3xl font-black text-purple-500 tracking-tighter">
                             {capacity.userCapacity.toLocaleString()}
                         </div>
-                        <span className="text-base font-bold text-purple-400/80">Users</span>
+                        <span className="text-base font-bold text-purple-400/80">Reqs/Sec</span>
                     </div>
 
                     {/* Breakdown Bars */}
@@ -803,7 +804,7 @@ export function BusinessImpactCards({ business, metrics, remediations }: { busin
             </Card>
 
             {/* CARD 3: STABILITY MATRIX */}
-            <Card className="bg-emerald-500/5 border-emerald-500/20 overflow-hidden transform hover:scale-[1.02] transition-all h-full min-h-[220px] animate-in fade-in slide-in-from-bottom-5 duration-700 delay-300">
+            < Card className="bg-emerald-500/5 border-emerald-500/20 overflow-hidden transform hover:scale-[1.02] transition-all h-full min-h-[220px] animate-in fade-in slide-in-from-bottom-5 duration-700 delay-300" >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                 <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between">
                     <CardDescription className="text-sm font-bold uppercase tracking-wider text-emerald-400">Stability Matrix</CardDescription>
@@ -840,11 +841,11 @@ export function BusinessImpactCards({ business, metrics, remediations }: { busin
                         </div>
                     </div>
                 </CardContent>
-            </Card>
+            </Card >
 
             {/* CARD 4: STRATEGIC REMEDIATIONS (Merged for alignment) */}
             {remediations && <StrategicRemediations remediations={remediations} />}
-        </div>
+        </div >
     );
 }
 

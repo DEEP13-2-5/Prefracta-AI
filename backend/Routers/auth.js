@@ -28,7 +28,7 @@ router.post("/signup", async (req, res) => {
 
         // Generate token for auto-login
         const secret = process.env.JWT_SECRET || "fallback_secret_key";
-        console.log(`🔐 Signing Signup Token for ID: ${savedUser._id} using secret: ${secret.substring(0, 3)}***`);
+
         const token = jwt.sign({ id: savedUser._id }, secret, { expiresIn: "7d" });
 
         res.json({
@@ -62,7 +62,7 @@ router.post("/login", async (req, res) => {
         if (!validPass) return res.status(400).json({ error: "Invalid password" });
 
         const secret = process.env.JWT_SECRET || "fallback_secret_key";
-        console.log(`🔐 Signing Login Token for ID: ${user._id} using secret: ${secret.substring(0, 3)}***`);
+
         const token = jwt.sign({ id: user._id }, secret, { expiresIn: "7d" });
 
         res.json({

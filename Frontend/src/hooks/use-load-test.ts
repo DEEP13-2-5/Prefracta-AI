@@ -17,23 +17,6 @@ export function useLoadTest(id?: string | number) {
   });
 }
 
-export function useChatHistory(sessionId?: string | number) {
-  const { token } = useAuth();
-  return useQuery({
-    queryKey: ["chat-history", sessionId],
-    queryFn: async () => {
-      if (!sessionId || !token) return null;
-      // Assuming an API call for chat history exists, e.g., api.getChatHistory
-      // This part needs to be adapted based on your actual API structure for chat history
-      // For now, returning a placeholder or throwing an error if no such API exists
-      // const result = await api.getChatHistory(token, sessionId);
-      // if (result.error) throw new Error(result.error);
-      // return result;
-      return { messages: [] }; // Placeholder
-    },
-    enabled: !!sessionId && !!token,
-  });
-}
 
 export function useRunLoadTest() {
   const { token, user, updateUser } = useAuth();
