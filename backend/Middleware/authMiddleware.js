@@ -23,6 +23,18 @@ export const verifyToken = async (req, res, next) => {
 
         if (!user) return res.status(401).json({ error: "User not found" });
 
+        // Auto-reset expired subscriptions to free plan
+        if (user.subscription.plan !== "free" && user.subscription.expiry) {
+            const now = new Date();
+            const expiryDate = new Date(user.subscription.expiry);
+
+            if (now >= expiryDate) {
+                user.subscription.plan = "free";
+                user.subscription.expiry = null;
+                await user.save();
+            }
+        }
+
         // Calculate daysLeft for response
         let daysLeft = 0;
         if (user.subscription.plan !== "free" && user.subscription.expiry) {

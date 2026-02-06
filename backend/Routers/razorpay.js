@@ -11,8 +11,6 @@ const getRazorpayKeys = () => {
     const keyId = (process.env.RAZORPAY_KEY_ID || "").trim();
     const keySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim();
 
-    console.log(`📋 Env Check: RAZORPAY_KEY_ID=${keyId ? 'YES' : 'NO'}, RAZORPAY_KEY_SECRET=${keySecret ? 'YES' : 'NO'}`);
-
     // Use test keys if env vars are missing
     const finalKeyId = keyId !== "" ? keyId : "rzp_test_dummy_key";
     const finalKeySecret = keySecret !== "" ? keySecret : "dummy_secret";
@@ -30,20 +28,13 @@ const PLANS = {
  * Initialize Payment
  */
 router.post("/create-sub", async (req, res) => {
-    console.log(`💳 Received create-sub request for user: ${req.user?._id}`);
     try {
         const { planType } = req.body;
         if (!PLANS[planType]) {
-            console.log(`❌ Invalid plan type: ${planType}`);
             return res.status(400).json({ error: "Invalid plan type" });
         }
 
         const { finalKeyId, finalKeySecret } = getRazorpayKeys();
-
-        console.log(`💳 Initializing Razorpay: ID=${finalKeyId.substring(0, 8)}... SECRET=${finalKeySecret ? 'PRESENT' : 'MISSING'}`);
-        if (!finalKeySecret || finalKeySecret === "dummy_secret") {
-            console.warn("⚠️ WARNING: Using dummy or missing Razorpay Secret!");
-        }
 
         const razorpay = new Razorpay({
             key_id: finalKeyId,
@@ -60,10 +51,7 @@ router.post("/create-sub", async (req, res) => {
             },
         };
 
-        console.log("📡 Calling Razorpay API to create order...");
         const order = await razorpay.orders.create(options);
-
-        console.log(`✅ Order Created: ${order.id}`);
 
         res.json({
             orderId: order.id,
@@ -72,8 +60,7 @@ router.post("/create-sub", async (req, res) => {
             razorpayKeyId: finalKeyId
         });
     } catch (err) {
-        console.error("❌ Razorpay Order Creation Error Details:", err);
-        console.error("❌ Razorpay Response Body:", err.response);
+        console.error("❌ Razorpay Error:", err.message || err);
         res.status(500).json({ error: err.description || err.message || "Razorpay Order Creation Failed" });
     }
 });
