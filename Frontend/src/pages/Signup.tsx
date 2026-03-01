@@ -36,9 +36,13 @@ export default function Signup() {
 
             setLocation('/dashboard');
         } catch (error: any) {
+            const message = (error?.message || '').toLowerCase().includes('timed out')
+                ? 'Backend is waking up. Please wait 10-20 seconds and try again.'
+                : error.message;
+
             toast({
                 title: 'Signup Failed',
-                description: error.message,
+                description: message,
                 variant: 'destructive'
             });
         } finally {

@@ -2,6 +2,11 @@ const API_URL = (import.meta.env.VITE_API_URL || "https://syncmind-ai.onrender.c
 const REQUEST_TIMEOUT_MS = 20000;
 const MAX_RETRIES = 2;
 
+type RequestConfig = {
+    timeoutMs?: number;
+    maxRetries?: number;
+};
+
 const getHeaders = (token?: string) => {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) {
@@ -28,9 +33,16 @@ const parseResponse = async (res: Response) => {
     }
 };
 
-const request = async (path: string, options: RequestInit = {}, attempt = 0): Promise<any> => {
+const request = async (
+    path: string,
+    options: RequestInit = {},
+    config: RequestConfig = {},
+    attempt = 0,
+): Promise<any> => {
+    const timeoutMs = config.timeoutMs ?? REQUEST_TIMEOUT_MS;
+    const maxRetries = config.maxRetries ?? MAX_RETRIES;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
         const res = await fetch(`${API_URL}${path}`, {
@@ -43,9 +55,9 @@ const request = async (path: string, options: RequestInit = {}, attempt = 0): Pr
         if (!res.ok) {
             const message = body?.error || body?.message || `Request failed with status ${res.status}`;
 
-            if (res.status >= 500 && attempt < MAX_RETRIES) {
+            if (res.status >= 500 && attempt < maxRetries) {
                 await wait(500 * (attempt + 1));
-                return request(path, options, attempt + 1);
+                return request(path, options, config, attempt + 1);
             }
 
             return { error: message };
@@ -56,9 +68,9 @@ const request = async (path: string, options: RequestInit = {}, attempt = 0): Pr
         const isAbort = error?.name === "AbortError";
         const isNetworkFailure = isAbort || error instanceof TypeError;
 
-        if (isNetworkFailure && attempt < MAX_RETRIES) {
+        if (isNetworkFailure && attempt < maxRetries) {
             await wait(500 * (attempt + 1));
-            return request(path, options, attempt + 1);
+            return request(path, options, config, attempt + 1);
         }
 
         return {
@@ -78,6 +90,9 @@ export const api = {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify({ username, email, password })
+        }, {
+            timeoutMs: 12000,
+            maxRetries: 0,
         });
     },
 
@@ -86,6 +101,9 @@ export const api = {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify({ email, password })
+        }, {
+            timeoutMs: 12000,
+            maxRetries: 0,
         });
     },
 

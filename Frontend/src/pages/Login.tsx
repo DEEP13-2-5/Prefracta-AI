@@ -25,9 +25,13 @@ export default function Login() {
             login(result.token, result.user);
             setLocation('/dashboard');
         } catch (error: any) {
+            const message = (error?.message || '').toLowerCase().includes('timed out')
+                ? 'Backend is waking up. Please wait 10-20 seconds and try again.'
+                : error.message;
+
             toast({
                 title: 'Login Failed',
-                description: error.message,
+                description: message,
                 variant: 'destructive'
             });
         } finally {
