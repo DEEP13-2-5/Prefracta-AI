@@ -17,7 +17,10 @@ export const verifyToken = async (req, res, next) => {
     let token = authHeader.replace(/^Bearer\s+/i, "").replace(/^Bearer\s+/i, "").replace(/^"|"$/g, "").trim();
 
     try {
-        const secret = process.env.JWT_SECRET || "fallback_secret_key";
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            return res.status(500).json({ error: "Server configuration error" });
+        }
         const verified = jwt.verify(token, secret);
         const user = await User.findById(verified.id).select("-password");
 

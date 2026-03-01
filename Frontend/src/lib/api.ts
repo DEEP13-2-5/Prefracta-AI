@@ -1,91 +1,144 @@
-const API_URL = import.meta.env.VITE_API_URL || 'https://syncmind-ai.onrender.com/api';
+const API_URL = (import.meta.env.VITE_API_URL || "https://syncmind-ai.onrender.com/api").replace(/\/$/, "");
+const REQUEST_TIMEOUT_MS = 20000;
+const MAX_RETRIES = 2;
 
 const getHeaders = (token?: string) => {
-    const headers: any = { 'Content-Type': 'application/json' };
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-        console.log(`📤 Sending Auth Header: Bearer ${token.substring(0, 10)}...`);
+        headers.Authorization = `Bearer ${token}`;
     }
     return headers;
+};
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const parseResponse = async (res: Response) => {
+    const text = await res.text();
+    if (!text) {
+        return {};
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        if (!res.ok) {
+            throw new Error(text || `Request failed with status ${res.status}`);
+        }
+        throw new Error("Invalid server response. Please try again.");
+    }
+};
+
+const request = async (path: string, options: RequestInit = {}, attempt = 0): Promise<any> => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    try {
+        const res = await fetch(`${API_URL}${path}`, {
+            ...options,
+            signal: controller.signal,
+        });
+
+        const body = await parseResponse(res);
+
+        if (!res.ok) {
+            const message = body?.error || body?.message || `Request failed with status ${res.status}`;
+
+            if (res.status >= 500 && attempt < MAX_RETRIES) {
+                await wait(500 * (attempt + 1));
+                return request(path, options, attempt + 1);
+            }
+
+            return { error: message };
+        }
+
+        return body;
+    } catch (error: any) {
+        const isAbort = error?.name === "AbortError";
+        const isNetworkFailure = isAbort || error instanceof TypeError;
+
+        if (isNetworkFailure && attempt < MAX_RETRIES) {
+            await wait(500 * (attempt + 1));
+            return request(path, options, attempt + 1);
+        }
+
+        return {
+            error: isAbort
+                ? "Request timed out. Please try again."
+                : (error?.message || "Network error. Please try again."),
+        };
+    } finally {
+        clearTimeout(timeoutId);
+    }
 };
 
 export const api = {
     // Auth
     signup: async (username: string, email: string, password: string) => {
-        const res = await fetch(`${API_URL}/auth/signup`, {
+        return request('/auth/signup', {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify({ username, email, password })
         });
-        return res.json();
     },
 
     login: async (email: string, password: string) => {
-        const res = await fetch(`${API_URL}/auth/login`, {
+        return request('/auth/login', {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify({ email, password })
         });
-        return res.json();
     },
 
     // Load Test
     runLoadTest: async (token: string, testURL: string, githubRepo?: string) => {
-        const res = await fetch(`${API_URL}/load-test`, {
+        return request('/load-test', {
             method: 'POST',
             headers: getHeaders(token),
             body: JSON.stringify({ testURL, githubRepo })
         });
-        return res.json();
     },
 
     // Chat
     sendMessage: async (token: string, sessionId: string, message: string) => {
-        const res = await fetch(`${API_URL}/chat`, {
+        return request('/chat', {
             method: 'POST',
             headers: getHeaders(token),
             body: JSON.stringify({ sessionId, message })
         });
-        return res.json();
     },
 
     getChatHistory: async (token: string, sessionId: string | number) => {
-        const res = await fetch(`${API_URL}/chat/${sessionId}`, {
+        return request(`/chat/${sessionId}`, {
             headers: getHeaders(token)
         });
-        return res.json();
     },
 
     // Payment
     createSubscription: async (token: string, planType: 'weekly' | 'monthly') => {
-        const res = await fetch(`${API_URL}/payment/create-sub`, {
+        return request('/payment/create-sub', {
             method: 'POST',
             headers: getHeaders(token),
             body: JSON.stringify({ planType })
         });
-        return res.json();
     },
 
     verifyPayment: async (token: string, paymentData: any) => {
-        const res = await fetch(`${API_URL}/payment/verify-payment`, {
+        return request('/payment/verify-payment', {
             method: 'POST',
             headers: getHeaders(token),
             body: JSON.stringify(paymentData)
         });
-        return res.json();
     },
 
     getLoadTest: async (token: string, id: string | number) => {
-        const res = await fetch(`${API_URL}/load-test/${id}`, {
+        return request(`/load-test/${id}`, {
             headers: getHeaders(token)
         });
-        return res.json();
     },
 
     getLatestLoadTest: async (token: string) => {
-        const res = await fetch(`${API_URL}/load-test/latest`, {
+        return request('/load-test/latest', {
             headers: getHeaders(token)
         });
-        return res.json();
     }
 };
