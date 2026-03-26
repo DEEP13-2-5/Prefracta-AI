@@ -1,139 +1,237 @@
-# Prefracta AI (Launch Intelligence Platform)
+# Prefracta AI
 
-**Prefracta AI** is a **B2B SaaS launch-intelligence platform** that helps engineering teams, startups, and organizations determine **whether a software product is truly ready for production launch**.
+> **Launch-intelligence for engineering teams.**
+> Connect your repo → stress-test with real traffic → get a precise AI verdict on whether your product is safe to ship.
 
-It orchestrates **multiple real-world system signals** — load, browser behavior, infrastructure stress, and cost impact — and uses **AI orchestration** to convert them into a **single, precise launch verdict**.
-
-> **One question. One answer.**
-> *“Is this product safe to launch — yes or no?”*
-
----
-
-## 🚀 What Problem It Solves
-
-Most software products fail **not because of missing features**, but because of:
-
-* Unknown scalability limits
-* Latency spikes under real traffic
-* Hidden frontend performance & accessibility issues
-* Unexpected infrastructure cost explosions
-
-Traditional tools analyze **parts** of the system.
-Prefracta AI evaluates the **entire launch surface**.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-prefracta--ai.vercel.app-blue?style=flat-square&logo=vercel)](https://prefracta-ai.vercel.app)
+![Stack](https://img.shields.io/badge/Stack-React%20%7C%20Node.js%20%7C%20MongoDB%20%7C%20k6%20%7C%20Playwright-informational?style=flat-square)
+![License](https://img.shields.io/badge/License-Educational%20%2F%20Demo-lightgrey?style=flat-square)
 
 ---
 
-## 🧠 How Prefracta AI Works (High-Level)
+## Overview
 
-1. User connects a **GitHub repository** (read-only)
-2. Repository is mirrored in a **temporary cloud environment**
-3. **Load tests** simulate real user traffic (k6)
-4. **Real-browser audits** run via Playwright
-5. System, frontend, and cost metrics are collected
-6. **AI Orchestration Layer** correlates all signals
-7. Temporary infrastructure is **fully destroyed**
-8. User receives a **clear launch-readiness verdict**
+Prefracta AI is a **B2B SaaS launch-intelligence platform** that answers one question for engineering teams:
 
----
+> *"Is this product truly ready to go live — or will it collapse under real users?"*
 
-## 🤖 AI Orchestration (Core Differentiator)
+Most software failures happen not because of missing features, but because of:
+- Unknown scalability limits that only appear under load
+- Latency spikes that slip past unit tests
+- Hidden frontend performance and accessibility issues
+- Unexpected infrastructure cost explosions at scale
 
-Prefracta AI does **not** run a single AI model.
-
-It performs **AI orchestration**, where multiple independent signals are combined:
-
-* Backend stress & failure thresholds
-* Frontend real-user experience metrics
-* Accessibility & SEO compliance
-* Cost amplification under load
-* System collapse points
-
-The AI layer **correlates these inputs** and produces:
-
-* A **precise readiness verdict**
-* Failure explanations in plain language
-* Actionable risk breakdowns
-
-> This is **decision intelligence**, not a chatbot.
+Traditional tools inspect **one signal at a time**. Prefracta AI evaluates the **entire launch surface** — backend stress, browser UX, accessibility, cost impact — and fuses all signals through an AI orchestration layer into a single, actionable verdict.
 
 ---
 
-## 📊 Metrics Generated
+## Demo
 
-* Latency (p50 / p95 / p99)
-* Error & failure rate
-* Maximum sustainable concurrent users
-* Browser performance scores (Playwright)
-* Accessibility & best-practice audits
-* Estimated infrastructure cost impact
-* Overall **Launch Readiness Score**
+**Live platform:** [https://prefracta-ai.vercel.app](https://prefracta-ai.vercel.app)
 
----
+![Prefracta AI – Platform overview](WhatsApp%20Image%202026-01-09%20at%2016.18.09.jpeg)
 
-## 🔐 Security & Privacy by Design
+| Dashboard | Load Test Results | AI Verdict |
+|:---------:|:-----------------:|:----------:|
+| ![Dashboard](docs/screenshot-dashboard.png) | ![Load Test](docs/screenshot-loadtest.png) | ![Verdict](docs/screenshot-verdict.png) |
 
-* ✅ Read-only GitHub access
-* ❌ No AI access to source code
-* ❌ No static code scanning
-* 🧨 Temporary cloud environment (auto-destroyed)
-* 🔒 Zero source-code retention
+> **Note:** Place `screenshot-dashboard.png`, `screenshot-loadtest.png`, and `screenshot-verdict.png` in the `docs/` folder to populate the table above.
 
 ---
 
-## 💼 B2B SaaS Model (Freemium)
+## Features
 
-Prefracta AI follows a **freemium B2B SaaS model**:
-
-### Free Tier
-
-* Limited audits
-* Core launch metrics
-* Ideal for individual developers & early testing
-
-### Paid Plans
-
-* Full audit depth
-* Higher load limits
-* Advanced AI explanations
-* Team & organization usage
-
-> Billing infrastructure is implemented in **test mode** for development and validation.
+- **GitHub OAuth integration** – connect any repo in seconds with read-only access
+- **k6 load testing** – simulates real concurrent user traffic against your live endpoints
+- **Playwright browser audits** – real Chromium sessions measuring Core Web Vitals, accessibility, and SEO
+- **AI orchestration** – correlates backend stress, frontend UX, cost amplification, and collapse thresholds into one verdict
+- **Launch Readiness Score** – a single numeric confidence score with plain-language explanations
+- **Freemium billing** – Razorpay integration (test mode) with free and paid tiers
+- **Zero retention** – temporary cloud workspace is spun up, used, and destroyed automatically
 
 ---
 
-## 🛠 Technology Stack
+## Tech Stack
 
-* **Frontend:** React, Chart.js
-* **Backend:** Node.js
-* **Database:** MongoDB
-* **Load Testing:** k6
-* **Browser Audits:** Playwright
-* **Cloud:** Azure (temporary workspace)
-* **AI Layer:** Agentic AI (Orchestration-based)
-* **Payments:** Razorpay (Test Mode)
-* **Deployment:** Vercel (Frontend)
-
----
-
-## 🧩 Project Status
-
-* Core architecture: ✅
-* Dashboard & analytics: ✅
-* GitHub OAuth integration: ✅
-* Load testing engine (k6): ✅
-* Browser audits (Playwright): ✅
-* AI orchestration logic: ✅
-* Full automation engine: 🚧 (manual orchestration at present)
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, TypeScript, Vite, Tailwind CSS, Radix UI, Framer Motion, Recharts |
+| Backend | Node.js, Express 5, MongoDB (Mongoose), JWT auth |
+| Load Testing | [k6](https://k6.io/) |
+| Browser Audits | [Playwright](https://playwright.dev/) |
+| AI Orchestration | OpenRouter API (agentic pipeline) |
+| Payments | Razorpay (test mode) |
+| Cloud Workspace | Azure (ephemeral, auto-destroyed) |
+| Deployment | Vercel (frontend) · Docker-ready backend |
 
 ---
 
-## 📌 Vision
+## Architecture — How It Works
 
-Prefracta AI aims to become the **standard pre-launch validation layer** for modern software systems — helping teams detect **real-world failure risks before real users do**.
+```
+User
+ │
+ ├─ 1. GitHub OAuth  →  read-only repo access
+ │
+ ├─ 2. Spin up temporary Azure environment
+ │        ↓
+ ├─ 3. k6 runner         (load / stress / spike tests)
+ ├─ 4. Playwright runner  (browser UX, a11y, SEO audits)
+ │        ↓
+ ├─ 5. Metric collector  (latency p50/p95/p99, error rate,
+ │                        max concurrent users, perf scores,
+ │                        infra cost estimate)
+ │        ↓
+ ├─ 6. AI Orchestration Layer
+ │        – correlates all signals
+ │        – identifies collapse points
+ │        – generates Launch Readiness Score + plain-language report
+ │        ↓
+ ├─ 7. Destroy temporary environment (zero retention)
+ │        ↓
+ └─ 8. Dashboard – verdict, charts, risk breakdown
+```
+
+**Key insight:** The AI layer performs *decision intelligence*, not Q&A. It reasons across multiple independent data streams simultaneously to surface failure patterns that no single metric would reveal alone.
 
 ---
 
-## 📄 License
+## Local Setup
 
-This project is shared for **educational, research, and demonstration purposes**.
+### Prerequisites
 
+- Node.js >= 18
+- MongoDB Atlas account (or local MongoDB)
+- OpenRouter API key
+- Razorpay test-mode keys (optional for billing features)
+
+### 1 — Clone & install
+
+```bash
+git clone https://github.com/DEEP13-2-5/Prefracta-AI.git
+cd Prefracta-AI
+```
+
+**Backend:**
+
+```bash
+cd backend
+npm install
+cp .env.example .env        # fill in your values
+npm run dev                  # nodemon server.js → http://localhost:8080
+```
+
+**Frontend:**
+
+```bash
+cd Frontend
+npm install
+cp .env.example .env        # fill in your values
+npm run dev                  # Vite dev server → http://localhost:5173
+```
+
+---
+
+## Environment Variables
+
+### Backend (`backend/.env`)
+
+| Variable | Description |
+|---|---|
+| `PORT` | Server port (default: `8080`) |
+| `FRONTEND_URL` | Allowed CORS origin (e.g. `https://prefracta-ai.vercel.app`) |
+| `MONGO_URI` | MongoDB connection string |
+| `JWT_SECRET` | Secret for signing JWT tokens |
+| `OPENROUTER_API_KEY` | OpenRouter API key for AI orchestration |
+| `RAZORPAY_KEY_ID` | Razorpay test-mode key ID |
+| `RAZORPAY_KEY_SECRET` | Razorpay test-mode key secret |
+| `EXECUTION_MODE` | `demo` skips real Azure spin-up; `normal` runs the full pipeline |
+
+See [`backend/.env.example`](backend/.env.example) for a ready-to-copy template.
+
+### Frontend (`Frontend/.env`)
+
+| Variable | Description |
+|---|---|
+| `VITE_API_URL` | Backend base URL (e.g. `http://localhost:8080/api`) |
+| `VITE_RAZORPAY_KEY_ID` | Razorpay key ID (public, safe to expose) |
+
+See [`Frontend/.env.example`](Frontend/.env.example) for the template.
+
+---
+
+## Deployment
+
+### Frontend — Vercel
+
+The `Frontend/` directory is configured for Vercel out of the box (`vercel.json` is present).
+
+```bash
+cd Frontend
+npm run build       # output: dist/
+# Deploy dist/ to Vercel, or run `vercel --prod`
+```
+
+Set the environment variables listed above in your Vercel project settings.
+
+### Backend — Docker / any Node host
+
+```bash
+cd backend
+docker build -t prefracta-backend .
+docker run -p 8080:8080 --env-file .env prefracta-backend
+```
+
+Or deploy the `backend/` folder directly to Render, Railway, or any Node.js host and configure the environment variables in the host dashboard.
+
+---
+
+## Security & Privacy
+
+| Guarantee | Status |
+|---|---|
+| GitHub access is read-only | ✅ |
+| AI layer never sees source code | ✅ |
+| No static code scanning or storage | ✅ |
+| Cloud environment auto-destroyed after audit | ✅ |
+| Zero source-code retention | ✅ |
+
+---
+
+## Project Status & Limitations
+
+| Feature | Status |
+|---|---|
+| Core architecture | ✅ Complete |
+| Dashboard & analytics UI | ✅ Complete |
+| GitHub OAuth login | ✅ Complete |
+| k6 load testing engine | ✅ Complete |
+| Playwright browser audits | ✅ Complete |
+| AI orchestration & verdict | ✅ Complete |
+| Freemium billing (Razorpay test mode) | ✅ Complete |
+| Full end-to-end automation (Azure orchestration) | 🚧 Partially manual |
+
+**Current limitations:**
+
+- The Azure workspace spin-up/tear-down is partially manual. Set `EXECUTION_MODE=demo` in `.env` to run the platform in demo mode, skipping real cloud provisioning.
+- Razorpay is configured in test mode — no real payments are processed.
+- k6 tests run against URLs provided by the user; the platform does not yet auto-discover endpoints from the repo.
+
+---
+
+## Roadmap
+
+- [ ] Fully automated Azure workspace provisioning and teardown
+- [ ] Endpoint auto-discovery from repository analysis
+- [ ] CI/CD webhook integration (trigger audits on every push)
+- [ ] Team and organization accounts
+- [ ] PDF / shareable audit reports
+- [ ] Slack / email notifications for verdict delivery
+- [ ] Support for AWS and GCP workspaces
+
+---
+
+## License
+
+This project is released for **educational, research, and demonstration purposes**.
+For commercial licensing or collaboration inquiries, open an issue or reach out via GitHub.
