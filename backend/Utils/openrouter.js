@@ -11,10 +11,11 @@ const getresponseopenrouter = async (messages) => {
       throw new Error("OpenRouter API key missing. Set OPENROUTER_API_KEY on deployment environment.");
     }
 
-    // Use only Qwen models
+    // Ordered fallback list; some free endpoints are intermittently unavailable.
     const freeModels = [
       "qwen/qwen3.6-plus-preview:free",
-      "qwen/qwen-2-7b-instruct:free",
+      "qwen/qwen2.5-7b-instruct",
+      "meta-llama/llama-3.1-8b-instruct:free",
     ];
 
     let lastError = null;

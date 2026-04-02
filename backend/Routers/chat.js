@@ -7,6 +7,30 @@ import TestSession from "../Models/TestSession.js";
 const router = express.Router();
 const inFlightChatRequests = new Map();
 
+function buildLocalFallbackDecision(session) {
+  const p95 = Number(session?.metrics?.latency?.p95 ?? 0);
+  const errRate = Number(session?.metrics?.errorRate ?? 0) * 100;
+  const throughput = Number(session?.metrics?.throughput ?? 0);
+  const docker = session?.github?.docker?.present;
+  const cicd = session?.github?.cicd?.present;
+
+  const reasons = [];
+  let verdict = "AUTHORIZE";
+
+  if (p95 > 200) reasons.push(`p95 latency ${p95}ms exceeds 200ms threshold`);
+  if (errRate > 1) reasons.push(`error rate ${errRate.toFixed(2)}% exceeds 1% threshold`);
+  if (docker === false) reasons.push("Docker not detected (architectural debt)");
+  if (cicd === false) reasons.push("CI/CD not detected (architectural debt)");
+  if (p95 > 200 || errRate > 1) verdict = "BLOCK";
+
+  return [
+    `DECISION: ${verdict}`,
+    reasons.length ? `RISKS: ${reasons.join("; ")}.` : "RISKS: No critical thresholds breached from current telemetry.",
+    `RUNTIME: p95=${p95}ms, errors=${errRate.toFixed(2)}%, throughput=${throughput} req/s.`,
+    "NOTE: Live AI provider is temporarily unavailable; this is a deterministic fallback decision."
+  ].join(" ");
+}
+
 // GET History
 router.get("/:sessionId", async (req, res) => {
   try {
@@ -117,7 +141,16 @@ Do not use fluff. Provide cold, hard engineering directives.
         return "AI service returned empty output. Please retry in 30 seconds.";
       } catch (aiError) {
         console.error("⚠️ OpenRouter API Failed:", aiError);
-        return `AI service error: ${aiError?.message || "provider unavailable"}`;
+        const msg = String(aiError?.message || "");
+        if (
+          /No endpoints found/i.test(msg) ||
+          /model.*not found/i.test(msg) ||
+          /provider unavailable/i.test(msg)
+        ) {
+          return buildLocalFallbackDecision(session);
+        }
+
+        return `AI service error: ${msg || "provider unavailable"}`;
       }
     })();
 
