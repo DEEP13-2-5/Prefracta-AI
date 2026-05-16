@@ -85,9 +85,9 @@ export function DashboardChat({ sessionId, initialMessage }: DashboardChatProps)
                             </div>
                         )}
 
-                        {chatHistory?.map((msg: any) => (
+                        {chatHistory?.map((msg: any, idx: number) => (
                             <div
-                                key={msg.id}
+                                key={msg.id ?? msg._id ?? `chat-msg-${idx}`}
                                 className={cn(
                                     "flex gap-3 text-sm",
                                     msg.role === "user" ? "flex-row-reverse" : "flex-row"

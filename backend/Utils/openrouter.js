@@ -15,7 +15,6 @@ const getresponseopenrouter = async (messages) => {
     const freeModels = [
       "qwen/qwen3.6-plus-preview:free",
       "qwen/qwen2.5-7b-instruct",
-      "meta-llama/llama-3.1-8b-instruct:free",
     ];
 
     let lastError = null;

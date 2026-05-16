@@ -10,6 +10,35 @@ import TestSession from "../Models/TestSession.js";
 
 const router = express.Router();
 
+// Helper: sanitize any provider-internal messages stored in sessions
+const sanitizeSessionForClient = (session) => {
+  if (!session) return session;
+  const clone = JSON.parse(JSON.stringify(session));
+
+  const suspiciousPattern = /(No endpoints found|meta-llama|llama-3\.1|endpoints found for|provider unavailable)/i;
+
+  if (clone.ai && typeof clone.ai.message === "string" && suspiciousPattern.test(clone.ai.message)) {
+    clone.ai = clone.ai || {};
+    clone.ai._originalMessage = clone.ai.message;
+    clone.ai.message = "Live AI provider message removed for privacy; a deterministic fallback is shown where applicable.";
+  }
+
+  if (Array.isArray(clone.chatHistory)) {
+    clone.chatHistory = clone.chatHistory.map((h) => {
+      if (h && h.role === "bot" && typeof h.content === "string" && suspiciousPattern.test(h.content)) {
+        return {
+          ...h,
+          _originalContent: h.content,
+          content: "Live AI provider message removed for privacy; a deterministic fallback is shown where applicable."
+        };
+      }
+      return h;
+    });
+  }
+
+  return clone;
+};
+
 // Run Load Test -> POST /api/load-test
 router.post("/", checkCreditsOrSub, async (req, res) => {
   try {
@@ -277,9 +306,10 @@ STRICT REPRODUCTION RULE: Do NOT include labels like "Paragraph 1", "Paragraph 2
             : "**Prefracta AI Verdict**\n\nAnalysis completed. Refer to metrics.";
 
       } catch (err) {
+        // Log full error server-side for debugging, but do not expose provider internals to users
         console.error("⚠️ Live Audit Agentic AI failed:", err);
         aiResponseMsg =
-          `Prefracta AI could not generate the live audit. Reason: ${err?.message || "provider unavailable"}`;
+          "Live AI provider is currently unavailable. A deterministic fallback audit has been generated instead.";
       }
 
       return {
@@ -361,19 +391,21 @@ router.get("/latest", async (req, res) => {
       return res.status(404).json({ error: "Previous test data incompatible/missing. Run a new test." });
     }
 
-    const session = await TestSession.findById(sessionId);
-    if (!session) return res.status(404).json({ error: "Latest report data expired" });
+      const session = await TestSession.findById(sessionId);
+      if (!session) return res.status(404).json({ error: "Latest report data expired" });
 
-    res.json({
-      id: session._id,
-      url: session.url,
-      metrics: session.metrics,
-      browserMetrics: session.browserMetrics,
-      charts: session.charts,
-      github: session.github,
-      ai: session.ai,
-      aiVerdict: "Passed" // Defaulting as before
-    });
+      const sanitized = sanitizeSessionForClient(session.toObject ? session.toObject() : session);
+
+      res.json({
+        id: sanitized._id || sanitized.id,
+        url: sanitized.url,
+        metrics: sanitized.metrics,
+        browserMetrics: sanitized.browserMetrics,
+        charts: sanitized.charts,
+        github: sanitized.github,
+        ai: sanitized.ai,
+        aiVerdict: "Passed" // Defaulting as before
+      });
   } catch (err) {
     console.error("❌ Get Latest Test Error:", err);
     res.status(500).json({ error: "Failed to fetch latest test" });
@@ -388,14 +420,16 @@ router.get("/:id", async (req, res) => {
 
     if (!session) return res.status(404).json({ error: "Report not found" });
 
+    const sanitized = sanitizeSessionForClient(session.toObject ? session.toObject() : session);
+
     res.json({
-      id: session._id,
-      url: session.url,
-      metrics: session.metrics,
-      browserMetrics: session.browserMetrics,
-      charts: session.charts,
-      github: session.github,
-      ai: session.ai,
+      id: sanitized._id || sanitized.id,
+      url: sanitized.url,
+      metrics: sanitized.metrics,
+      browserMetrics: sanitized.browserMetrics,
+      charts: sanitized.charts,
+      github: sanitized.github,
+      ai: sanitized.ai,
       aiVerdict: "Passed"
     });
   } catch (err) {

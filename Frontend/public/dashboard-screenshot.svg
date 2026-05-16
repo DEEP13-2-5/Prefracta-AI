@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" fill="none">
+  <rect width="1200" height="700" rx="20" fill="#ffffff" stroke="#e6eefb" />
+  <rect x="28" y="28" width="1144" height="64" rx="8" fill="#f5f9ff" />
+  <circle cx="80" cy="60" r="18" fill="#e6f0ff" />
+  <rect x="120" y="42" width="200" height="36" rx="6" fill="#fff" />
+
+  <!-- Left column menu -->
+  <rect x="28" y="108" width="200" height="560" rx="12" fill="#fbfdff" />
+  <g transform="translate(40,130)">
+    <rect width="160" height="28" rx="8" fill="#eef6ff" />
+    <rect y="48" width="160" height="28" rx="8" fill="#fff" />
+    <rect y="96" width="160" height="28" rx="8" fill="#fff" />
+    <rect y="144" width="160" height="28" rx="8" fill="#fff" />
+  </g>
+
+  <!-- Main panels -->
+  <rect x="244" y="108" width="928" height="160" rx="12" fill="#f8fbff" />
+  <rect x="244" y="284" width="600" height="384" rx="12" fill="#ffffff" />
+  <rect x="860" y="284" width="312" height="384" rx="12" fill="#ffffff" />
+
+  <!-- Small metrics -->
+  <g fill="#0b4aee" font-family="Inter, Arial" font-size="20">
+    <text x="268" y="148">P50 Latency</text>
+    <text x="420" y="148" font-weight="700">120ms</text>
+    <text x="580" y="148">P95</text>
+    <text x="680" y="148" font-weight="700">430ms</text>
+    <text x="820" y="148">Error Rate</text>
+    <text x="940" y="148" font-weight="700">0.8%</text>
+  </g>
+
+  <!-- Line chart -->
+  <g transform="translate(264,320)">
+    <rect width="560" height="260" rx="8" fill="#fbfdff" />
+    <polyline points="20,220 80,180 140,150 200,120 260,140 320,110 380,90 440,60 520,40" stroke="#0b4aee" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    <polyline points="20,200 80,170 140,130 200,100 260,120 320,90 380,80 440,50 520,30" stroke="#22c55e" stroke-width="4" fill="none" opacity="0.9" />
+    <rect x="8" y="8" width="120" height="28" rx="6" fill="#fff" />
+  </g>
+
+  <!-- Right side list -->
+  <g transform="translate(872,300)" fill="#475569" font-family="Inter, Arial">
+    <text x="16" y="28" font-size="18" font-weight="700">Top Alerts</text>
+    <rect x="16" y="44" width="264" height="48" rx="8" fill="#fff" />
+    <text x="32" y="76" font-size="14">DB connections spike — 3m ago</text>
+    <rect x="16" y="108" width="264" height="48" rx="8" fill="#fff" />
+    <text x="32" y="140" font-size="14">Slow endpoint /api/search</text>
+    <rect x="16" y="172" width="264" height="48" rx="8" fill="#fff" />
+    <text x="32" y="204" font-size="14">High 95th latency — region eu-west</text>
+  </g>
+
+  <!-- Footer small badges -->
+  <g transform="translate(264,620)" fill="#94a3b8" font-family="Inter, Arial" font-size="13">
+    <text x="0" y="14">Runs with</text>
+    <rect x="80" y="-4" width="56" height="22" rx="4" fill="#eef2ff" />
+    <text x="88" y="12">K6</text>
+    <rect x="150" y="-4" width="70" height="22" rx="4" fill="#eef2ff" />
+    <text x="160" y="12">Playwright</text>
+    <rect x="230" y="-4" width="70" height="22" rx="4" fill="#eef2ff" />
+    <text x="240" y="12">Kubernetes</text>
+  </g>
+</svg>

@@ -31,6 +31,24 @@ function buildLocalFallbackDecision(session) {
   ].join(" ");
 }
 
+// Helper: sanitize chat history to avoid leaking provider internals
+const sanitizeChatHistoryForClient = (history) => {
+  if (!Array.isArray(history)) return history;
+  const suspiciousPattern = /(No endpoints found|meta-llama|llama-3\.1|endpoints found for|provider unavailable)/i;
+
+  return history.map((h) => {
+    if (!h || typeof h.content !== "string") return h;
+    if (suspiciousPattern.test(h.content) && h.role === "bot") {
+      return {
+        ...h,
+        _originalContent: h.content,
+        content: "Live AI provider message removed for privacy; a deterministic fallback is shown where applicable."
+      };
+    }
+    return h;
+  });
+};
+
 // GET History
 router.get("/:sessionId", async (req, res) => {
   try {
@@ -40,7 +58,8 @@ router.get("/:sessionId", async (req, res) => {
 
     const session = await TestSession.findById(sessionId);
     if (!session) return res.json([]);
-    res.json(session.chatHistory || []);
+    const sanitized = sanitizeChatHistoryForClient(session.chatHistory || []);
+    res.json(sanitized);
   } catch (err) {
     console.error("❌ Get Chat History Error:", err);
     res.json([]);
