@@ -169,7 +169,7 @@ The application will be available at `http://localhost:3000`
 
 ## 📈 Why Prefracta Stands Out
 
-| vs. K6 | vs. Playwright | vs. DataDog | **Prefracta** |
+| vs. K6 | vs. Playwright | vs. Datadog | **Prefracta** |
 |--------|---|---|---|
 | Load testing only | Browser testing only | Metrics only | **End-to-end audit** |
 | Raw metrics | Individual test results | Requires expertise to interpret | **AI-driven verdict** |
