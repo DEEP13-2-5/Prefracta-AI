@@ -9,13 +9,14 @@ export const runPlaywrightAudit = async (testURL, { forceSimulation = false } = 
     const isDemo = mode === "demo" || forceSimulation === true;
 
     if (isDemo) {
-        // Realistic simulation mode fallback
         const mockResult = {
-            performance: 75 + Math.random() * 20,
-            accessibility: 85 + Math.random() * 10,
-            bestPractices: 80 + Math.random() * 15,
-            seo: 90 + Math.random() * 10,
-            interactivity: 70 + Math.random() * 25,
+            performance: 82,
+            accessibility: 92,
+            bestPractices: 88,
+            seo: 95,
+            interactivity: 78,
+            source: "demo",
+            loadTimeMs: null,
         };
         return new Promise(resolve => setTimeout(() => resolve(mockResult), 1000));
     }
@@ -82,7 +83,8 @@ export const runPlaywrightAudit = async (testURL, { forceSimulation = false } = 
             bestPractices: Number(auditResults.bestPractices.toFixed(0)),
             seo: Number(auditResults.seo.toFixed(0)),
             interactivity: Number(interactivityScore.toFixed(0)),
-            loadTimeMs: loadTime
+            loadTimeMs: loadTime,
+            source: "real"
         };
 
 
@@ -92,7 +94,6 @@ export const runPlaywrightAudit = async (testURL, { forceSimulation = false } = 
     } catch (error) {
         console.error("❌ Playwright Audit Failed:", error.message);
         if (browser) await browser.close();
-        // Fallback to simulation if real audit fails
-        return runPlaywrightAudit(testURL, { forceSimulation: true });
+        return null;
     }
 };

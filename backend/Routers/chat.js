@@ -34,14 +34,13 @@ function buildLocalFallbackDecision(session) {
 // Helper: sanitize chat history to avoid leaking provider internals
 const sanitizeChatHistoryForClient = (history) => {
   if (!Array.isArray(history)) return history;
-  const suspiciousPattern = /(No endpoints found|meta-llama|llama-3\.1|endpoints found for|provider unavailable)/i;
+  const suspiciousPattern = /(No endpoints found|endpoints found for|provider unavailable|model.*not found|qwen|meta-llama|llama-3\.1)/i;
 
   return history.map((h) => {
     if (!h || typeof h.content !== "string") return h;
     if (suspiciousPattern.test(h.content) && h.role === "bot") {
       return {
         ...h,
-        _originalContent: h.content,
         content: "Live AI provider message removed for privacy; a deterministic fallback is shown where applicable."
       };
     }
@@ -138,7 +137,13 @@ Do not use fluff. Provide cold, hard engineering directives.
       { role: "system", content: "Current System Telemetry: " + metricsContext },
       // Map previous history (limit to last 10 to fit context window if needed)
       ...(session.chatHistory || [])
-        .filter(msg => !msg.content.includes("returned no content") && !msg.content.includes("unable to analyze"))
+        .filter(msg => {
+          const content = String(msg?.content || "");
+          return (
+            !/returned no content|unable to analyze/i.test(content) &&
+            !/(No endpoints found|endpoints found for|provider unavailable|model.*not found|qwen|meta-llama|llama-3\.1)/i.test(content)
+          );
+        })
         .map(msg => ({
           role: msg.role === "bot" ? "assistant" : "user", // API expects 'assistant' not 'bot'
           content: msg.content

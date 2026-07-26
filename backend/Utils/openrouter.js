@@ -1,20 +1,22 @@
 import "dotenv/config";
 
+const OPENROUTER_MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
+console.log(`🤖 OpenRouter model configured: ${OPENROUTER_MODEL}`);
+
 const getresponseopenrouter = async (messages) => {
   try {
     const apiKey =
       process.env.OPENROUTER_API_KEY ||
       process.env.OPENROUTER_KEY ||
       process.env.OpenRouter;
-    const appUrl = process.env.FRONTEND_URL || "https://prefracta-ai.vercel.app";
+    const appUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     if (!apiKey) {
       throw new Error("OpenRouter API key missing. Set OPENROUTER_API_KEY on deployment environment.");
     }
 
-    // Ordered fallback list; some free endpoints are intermittently unavailable.
+    // Keep this as a list so a fallback can be added intentionally later.
     const freeModels = [
-      "qwen/qwen3.6-plus-preview:free",
-      "qwen/qwen2.5-7b-instruct",
+      OPENROUTER_MODEL,
     ];
 
     let lastError = null;
@@ -83,4 +85,3 @@ const getresponseopenrouter = async (messages) => {
 };
 
 export default getresponseopenrouter;
-

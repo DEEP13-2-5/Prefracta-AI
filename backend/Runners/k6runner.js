@@ -12,7 +12,7 @@ import os from "os";
  */
 export const runK6Test = (
   testURL,
-  { vus = 200, duration = "5s", forceSimulation = false } = {}
+  { vus = 200, duration = "5s", sleepDuration = "0.05", forceSimulation = false } = {}
 ) => {
   return new Promise((resolve, reject) => {
     // --- DEMO MODE / SIMULATION LOGIC ---
@@ -69,12 +69,12 @@ export const runK6Test = (
       const scriptPath = path.resolve(process.cwd(), "loadtester/k6/test.js");
 
       // Construct single-line command
-      const cmd = `k6 run --summary-export="${resultFile}" --env TARGET_URL="${testURL}" --env VUS="${vus}" --env DURATION="${duration}" "${scriptPath}"`;
+      const cmd = `k6 run --summary-export="${resultFile}" --env TARGET_URL="${testURL}" --env VUS="${vus}" --env DURATION="${duration}" --env SLEEP_DURATION="${sleepDuration}" "${scriptPath}"`;
 
       exec("k6 version", (verErr, verStdout) => {
         if (verErr) {
           console.error("❌ K6 Binary not found. Triggering fallback simulation...");
-          return resolve(runK6Test(testURL, { vus, duration, forceSimulation: true }));
+          return resolve(runK6Test(testURL, { vus, duration, sleepDuration, forceSimulation: true }));
         }
 
         exec(cmd, { maxBuffer: 1024 * 1024 * 10 }, (error, stdout, stderr) => {

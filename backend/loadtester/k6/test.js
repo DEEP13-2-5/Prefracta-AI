@@ -5,8 +5,8 @@ import { Counter } from 'k6/metrics';
 export const serverErrors = new Counter('server_errors');
 
 export const options = {
-  vus: __ENV.VUS ? Number(__ENV.VUS) : 50,    // increased load
-  duration: __ENV.DURATION || "30s",          // safe default
+  vus: __ENV.VUS ? Number(__ENV.VUS) : 50,
+  duration: __ENV.DURATION || "30s",
 };
 
 export default function () {
@@ -16,5 +16,8 @@ export default function () {
     serverErrors.add(1);
   }
 
-  sleep(1);
+  const sleepDuration = __ENV.SLEEP_DURATION ? Number(__ENV.SLEEP_DURATION) : 0.05;
+  if (sleepDuration > 0) {
+    sleep(sleepDuration);
+  }
 }

@@ -15,11 +15,10 @@ const sanitizeSessionForClient = (session) => {
   if (!session) return session;
   const clone = JSON.parse(JSON.stringify(session));
 
-  const suspiciousPattern = /(No endpoints found|meta-llama|llama-3\.1|endpoints found for|provider unavailable)/i;
+  const suspiciousPattern = /(No endpoints found|endpoints found for|provider unavailable|model.*not found|qwen|meta-llama|llama-3\.1)/i;
 
   if (clone.ai && typeof clone.ai.message === "string" && suspiciousPattern.test(clone.ai.message)) {
     clone.ai = clone.ai || {};
-    clone.ai._originalMessage = clone.ai.message;
     clone.ai.message = "Live AI provider message removed for privacy; a deterministic fallback is shown where applicable.";
   }
 
@@ -28,7 +27,6 @@ const sanitizeSessionForClient = (session) => {
       if (h && h.role === "bot" && typeof h.content === "string" && suspiciousPattern.test(h.content)) {
         return {
           ...h,
-          _originalContent: h.content,
           content: "Live AI provider message removed for privacy; a deterministic fallback is shown where applicable."
         };
       }
@@ -42,7 +40,7 @@ const sanitizeSessionForClient = (session) => {
 // Run Load Test -> POST /api/load-test
 router.post("/", checkCreditsOrSub, async (req, res) => {
   try {
-    const { testURL, githubRepo } = req.body;
+    const { testURL, githubRepo, sleepDuration } = req.body;
 
     if (!testURL && !githubRepo) {
       return res.status(400).json({ error: "Provide testURL or githubRepo" });
@@ -54,7 +52,7 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
     // Run all in parallel to save time and avoid timeouts
     const [testResult, githubResult, playwrightResult] = await Promise.all([
       testURL
-        ? runK6Test(testURL, { vus: 200, duration: "5s" }).catch(e => {
+        ? runK6Test(testURL, { vus: 200, duration: "5s", sleepDuration }).catch(e => {
           console.error("⚠️ K6 Test Failed:", e);
           return null;
         })
@@ -178,9 +176,9 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
       businessMetrics.adSpendRisk = Math.round(metrics.failureRateUnderTest * metrics.throughput * estimatedProfitPerRequest * dailyTrafficMultiplier);
 
       // Breakdown calculation
-      const pPerf = Math.max(0, 100 - (metrics.failureRateUnderTest * 1000) - (metrics.latency?.avg / 50));
+      const pPerf = Math.max(0, Math.min(100, 100 - (metrics.failureRateUnderTest * 1000) - ((metrics.latency?.avg || 0) / 50)));
       const pArch = playwrightResult ? (playwrightResult.performance + playwrightResult.bestPractices) / 2 : 50;
-      const pDev = githubResult?.summary?.devOpsScore || 20;
+      const pDev = githubResult?.summary?.devOpsScore ?? 20;
 
       businessMetrics.scoreBreakdown = {
         performance: Math.round(pPerf),
@@ -188,7 +186,7 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
         devops: Math.round(pDev)
       };
 
-      businessMetrics.stabilityRiskScore = Math.round((pPerf + pArch + pDev) / 3);
+      businessMetrics.stabilityRiskScore = Math.max(0, Math.min(100, Math.round((pPerf + pArch + pDev) / 3)));
 
       // Calculate Collapse Point based on Throughput (standardized to req/s)
       // Formula: Current Throughput adjusted by failure rate and safety margin
@@ -210,14 +208,14 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
         dev: ["Enforce CI/CD Pipeline", "Hardcode Automation Workflows", "Setup Automated Rollback"]
       };
 
-      const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+      const pick = (arr) => arr[0];
 
       if (metrics.latency?.p95 > 200) {
         const reduction = Math.round(metrics.latency.p95 * 0.7);
         rems.push(`${pick(phrases.lat)} → -${reduction}ms p95 latency`);
       }
       if (metrics.throughput < 500) {
-        const gain = parseFloat((1.2 + Math.random() * 0.8).toFixed(1));
+        const gain = metrics.throughput < 100 ? 2.0 : 1.5;
         rems.push(`${pick(phrases.thr)} → +${gain}x throughput capacity`);
       }
       if (metrics.serverErrorRate > 0 || metrics.failureRateUnderTest > 0.05) {
@@ -227,7 +225,7 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
       if (githubResult && !githubResult.cicd?.present) {
         businessMetrics.cicdRisk = {
           severity: "CRITICAL",
-          consequence: `Manual deploy = ${Math.floor(Math.random() * 3) + 2}× higher outage risk`,
+          consequence: "Manual deploy = 2× higher outage risk",
           details: "Rollback failure and hotfix delays are inevitable during a spike without automation."
         };
         rems.push(`${pick(phrases.dev)} → Eliminate human fail-points`);
@@ -285,13 +283,13 @@ Generate the "Harsh Reality Executive Summary" strictly in this format:
 **Prefracta AI Verdict**
 
 [The Business Reality]
-Map technical performance to conversion and revenue. Use the financial data (e.g., "At your current latency, you lose ~7% of conversions"). Tell them if they are burning money.
+Map only the observed technical signals to business risk. Use cautious language such as "estimated", "may", and "risk". Do not cite industry data or exact revenue loss unless it is present in the context.
 
 [The Actionable Remediation]
 Provide specific technical fixes that lead to business gains. Format as: "Add [Feature] -> [Business Benefit]".
 
 [The Collapse Point]
-State exactly where the traffic breaks the system and the resulting business blackout.
+State the estimated load threshold from the provided metrics. Do not claim permanent blackout or hardware failure; frame it as a capacity-risk estimate.
 
 STRICT REPRODUCTION RULE: Do NOT include labels like "Paragraph 1", "Paragraph 2", or "Paragraph 3" in your output. Just provide the text.
         `.trim()
@@ -324,6 +322,10 @@ STRICT REPRODUCTION RULE: Do NOT include labels like "Paragraph 1", "Paragraph 2
       getresponseopenrouter
     });
     const aiResponseMsg = aiResponse.message;
+    const aiPayload = {
+      ...aiResponse,
+      businessInsights: businessMetrics
+    };
 
     // Create new session in DB
     const newSession = new TestSession({
@@ -333,10 +335,7 @@ STRICT REPRODUCTION RULE: Do NOT include labels like "Paragraph 1", "Paragraph 2
       browserMetrics: playwrightResult,
       charts,
       github,
-      ai: {
-        ...aiResponse,
-        businessInsights: businessMetrics
-      },
+      ai: aiPayload,
       chatHistory: [{ role: "assistant", content: aiResponseMsg }]
     });
 
@@ -360,7 +359,7 @@ STRICT REPRODUCTION RULE: Do NOT include labels like "Paragraph 1", "Paragraph 2
       browserMetrics: newSession?.browserMetrics || playwrightResult,
       charts,
       github,
-      ai: aiResponse,
+      ai: aiPayload,
       user: {
         username: req.user.username,
         email: req.user.email,
@@ -450,4 +449,3 @@ export default router;
 //   github,
 //   ai: { message: aiMessage }
 // });
-
