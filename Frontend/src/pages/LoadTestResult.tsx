@@ -26,22 +26,17 @@ export default function LoadTestResult() {
   if (isLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
   if (!testData) return <div>Test not found</div>;
 
-  const jitter = (val: number | null | undefined, intensity = 0.05) => {
-    const base = val || (Math.random() * 2 + 1); // baseline of 1-3 if null/0
-    return base + (base * (Math.random() * intensity * 2 - intensity));
-  };
-
-  // Improved chart data with jitter
-  const chartData = testData.charts && testData.charts.length > 0
-    ? testData.charts.map((p: any) => ({ ...p, value: jitter(p.value) }))
-    : [
-      { timestamp: '0s', value: jitter(0) },
-      { timestamp: '10s', value: jitter(0) },
-      { timestamp: '20s', value: jitter(0) },
-      { timestamp: '30s', value: jitter(0) },
-    ];
-
   const metrics = testData.metrics as any || { p50: 0, p95: 0, errorRate: "0%" };
+  const chartData = Array.isArray(testData.charts?.labels)
+    ? testData.charts.labels.map((label: string, index: number) => ({
+      timestamp: label,
+      value: testData.charts?.datasets?.[0]?.data?.[index] || 0,
+    }))
+    : [
+      { timestamp: "p50", value: metrics.latency?.p50 || metrics.p50 || 0 },
+      { timestamp: "p95", value: metrics.latency?.p95 || metrics.p95 || 0 },
+      { timestamp: "p99", value: metrics.latency?.p99 || 0 },
+    ].filter((point) => point.value > 0);
   const aiMessage = testData.ai?.message || "Prefracta AI Strategic Audit: Analyzing system telemetry for architectural bottlenecks. Detailed findings will appear shortly.";
 
   const handleSendChat = (e: React.FormEvent) => {

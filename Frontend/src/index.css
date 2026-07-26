@@ -6,7 +6,13 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: #020817; /* slate-950 — prevents white flash on dark pages */
 }
+
+body {
+  background-color: #020817; /* matches Landing/dark pages to eliminate whitespace bleed */
+}
+
 
 :root {
   --font-sans: 'Inter', sans-serif;

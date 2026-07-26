@@ -60,16 +60,11 @@ export default function Dashboard() {
   const business = ai?.businessInsights;
 
   /* ---------------- DATA SYNTHESIS FOR CHARTS ---------------- */
-  const variance = (base: number) => {
-    const v = base * 0.15;
-    return Math.max(0, base - v + Math.random() * (v * 2));
-  };
-
   const throughputData = useMemo(() => m ? [
-    { timestamp: "T-4s", success: variance(m.throughput * 0.7 * (1 - m.failureRateUnderTest)), errors: variance(m.throughput * 0.7 * m.failureRateUnderTest) },
-    { timestamp: "T-3s", success: variance(m.throughput * 0.8 * (1 - m.failureRateUnderTest)), errors: variance(m.throughput * 0.8 * m.failureRateUnderTest) },
-    { timestamp: "T-2s", success: variance(m.throughput * 1.0 * (1 - m.failureRateUnderTest)), errors: variance(m.throughput * 1.0 * m.failureRateUnderTest) },
-    { timestamp: "T-1s", success: variance(m.throughput * 1.2 * (1 - m.failureRateUnderTest)), errors: variance(m.throughput * 1.2 * m.failureRateUnderTest) },
+    { timestamp: "T-4s", success: m.throughput * 0.7 * (1 - m.failureRateUnderTest), errors: m.throughput * 0.7 * m.failureRateUnderTest },
+    { timestamp: "T-3s", success: m.throughput * 0.8 * (1 - m.failureRateUnderTest), errors: m.throughput * 0.8 * m.failureRateUnderTest },
+    { timestamp: "T-2s", success: m.throughput * 1.0 * (1 - m.failureRateUnderTest), errors: m.throughput * 1.0 * m.failureRateUnderTest },
+    { timestamp: "T-1s", success: m.throughput * 1.2 * (1 - m.failureRateUnderTest), errors: m.throughput * 1.2 * m.failureRateUnderTest },
     { timestamp: "Latest", success: m.throughput * (1 - m.failureRateUnderTest), errors: m.throughput * m.failureRateUnderTest }
   ] : [], [m]);
 
@@ -91,13 +86,7 @@ export default function Dashboard() {
     { subject: "Practices", A: b.bestPractices || 0, fullMark: 100 },
     { subject: "SEO", A: b.seo || 0, fullMark: 100 },
     { subject: "Speed", A: b.interactivity || 0, fullMark: 100 },
-  ] : [
-    { subject: 'Performance', A: 85, fullMark: 100 },
-    { subject: 'Access', A: 90, fullMark: 100 },
-    { subject: 'Practices', A: 88, fullMark: 100 },
-    { subject: 'SEO', A: 95, fullMark: 100 },
-    { subject: 'Speed', A: 82, fullMark: 100 },
-  ], [b]);
+  ] : [], [b]);
 
   const tabs = [
     { id: "overview", label: "Overview", icon: BrainCircuit },
@@ -198,7 +187,11 @@ export default function Dashboard() {
                 <Card className="h-full">
                   <CardHeader>
                     <CardTitle>Playwright Audit Breakdown</CardTitle>
-                    <CardDescription>Deep dive into browser-level performance and accessibility</CardDescription>
+                    <CardDescription>
+                      {b?.source === "real"
+                        ? `Real browser audit${b.loadTimeMs ? `, load time ${b.loadTimeMs}ms` : ""}`
+                        : "Browser audit data unavailable for this run"}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">

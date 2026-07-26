@@ -173,9 +173,8 @@ export function SystemHealthChart({ data, metrics, github }: { data?: any[], met
                             <TooltipContent className="max-w-[300px] p-4 text-xs">
                                 <p className="font-bold mb-2">How is this calculated?</p>
                                 <ul className="list-disc pl-4 space-y-1">
-                                    <li><span className="font-semibold text-primary">50% Runtime:</span> Weighted average of Latency (p95) and Error Rates.</li>
-                                    <li><span className="font-semibold text-primary">30% Architecture:</span> Logic based on Throughput capacity and scalability limits.</li>
-                                    <li><span className="font-semibold text-primary">20% DevOps:</span> Presence of Docker, CI/CD pipelines, and K8s manifests.</li>
+                                    <li><span className="font-semibold text-primary">50 pts Runtime:</span> Error rate, p95 latency, latency consistency, and throughput.</li>
+                                    <li><span className="font-semibold text-primary">50 pts DevOps:</span> Docker, CI/CD, Kubernetes manifests, and start/dev scripts.</li>
                                 </ul>
                             </TooltipContent>
                         </UITooltip>
@@ -546,8 +545,8 @@ export function CollapsePointChart({ metrics, business }: { metrics?: any, busin
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                     <div>
-                        <CardTitle className="text-xl font-bold text-red-500">Architecture Collapse Point</CardTitle>
-                        <CardDescription>Predictive breaking point based on current heap/latency telemetry</CardDescription>
+                        <CardTitle className="text-xl font-bold text-red-500">Estimated Capacity Threshold</CardTitle>
+                        <CardDescription>Derived from observed throughput, failure rate, and a safety margin</CardDescription>
                     </div>
                 </div>
             </CardHeader>
@@ -578,7 +577,7 @@ export function CollapsePointChart({ metrics, business }: { metrics?: any, busin
                                                 <p className="text-sm font-bold text-primary">{payload[0].payload.name}</p>
                                                 <p className="text-2xl font-black">{Math.round(Number(payload[0].value || 0))} Reqs/s</p>
                                                 <p className={`text-xs mt-1 ${payload[0].payload.status === 'Collapse' ? 'text-red-500 font-bold uppercase' : 'text-muted-foreground'}`}>
-                                                    {payload[0].payload.status === 'Collapse' ? '🔥 CRITICAL LIMIT' : 'SYSTEM STATUS: STABLE'}
+                                                    {payload[0].payload.status === 'Collapse' ? 'ESTIMATED RISK LIMIT' : 'SYSTEM STATUS: STABLE'}
                                                 </p>
                                             </div>
                                         );
@@ -604,8 +603,8 @@ export function CollapsePointChart({ metrics, business }: { metrics?: any, busin
                             <Activity className="w-6 h-6 text-red-500" />
                         </div>
                         <div>
-                            <p className="text-xs uppercase tracking-widest font-bold text-red-500">Brutal Verdict</p>
-                            <p className="text-sm font-medium">Your stack will fundamentally fail at <span className="font-black text-lg text-red-500">{collapsePoint} Reqs/Sec</span>. Beyond this, hardware saturation causes permanent service blackout.</p>
+                            <p className="text-xs uppercase tracking-widest font-bold text-red-500">Capacity Risk Estimate</p>
+                            <p className="text-sm font-medium">This run estimates elevated risk around <span className="font-black text-lg text-red-500">{collapsePoint} Reqs/Sec</span>. Validate with a longer stepped load test before treating it as a hard failure point.</p>
                         </div>
                     </div>
                 </div>
@@ -769,8 +768,8 @@ export function BusinessImpactCards({ business, metrics, remediations }: { busin
                     <div className="space-y-4">
                         <div className="space-y-1">
                             <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-tighter text-purple-400/80">
-                                <span>Concurrent Users</span>
-                                <span className="font-mono text-purple-500">~{capacity.userCapacity} Active</span>
+                                <span>Collapse Point</span>
+                                <span className="font-mono text-purple-500">~{capacity.userCapacity} req/s</span>
                             </div>
                             <div className="w-full bg-purple-500/10 h-1.5 rounded-full overflow-hidden relative">
                                 <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite] skew-x-12" />
@@ -798,7 +797,7 @@ export function BusinessImpactCards({ business, metrics, remediations }: { busin
                     </div>
 
                     <p className="text-[10px] text-purple-400/50 mt-4 text-right italic">
-                        * Projected limits assumption for safety assurance
+                        * Derived from current throughput, failure rate, and latency
                     </p>
                 </CardContent>
             </Card>

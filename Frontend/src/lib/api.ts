@@ -1,7 +1,9 @@
-const API_URL = (import.meta.env.VITE_API_URL || "https://syncmind-ai.onrender.com/api").replace(/\/$/, "");
+const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080/api").replace(/\/$/, "");
 const BACKEND_ROOT_URL = API_URL.replace(/\/api$/, "");
 const REQUEST_TIMEOUT_MS = 20000;
 const MAX_RETRIES = 2;
+
+console.log(`API configured for: ${API_URL}`);
 
 type RequestConfig = {
     timeoutMs?: number;
@@ -55,6 +57,12 @@ const request = async (
 
         if (!res.ok) {
             const message = body?.error || body?.message || `Request failed with status ${res.status}`;
+
+            if (/invalid token/i.test(message)) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "/login";
+            }
 
             if (res.status >= 500 && attempt < maxRetries) {
                 await wait(500 * (attempt + 1));
