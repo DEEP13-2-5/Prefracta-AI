@@ -1,4 +1,7 @@
-const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080/api").replace(/\/$/, "");
+const DEFAULT_API_URL = import.meta.env.DEV
+    ? "http://localhost:8080/api"
+    : "https://syncmind-ai.onrender.com/api";
+const API_URL = (import.meta.env.VITE_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
 const BACKEND_ROOT_URL = API_URL.replace(/\/api$/, "");
 const REQUEST_TIMEOUT_MS = 20000;
 const MAX_RETRIES = 2;
