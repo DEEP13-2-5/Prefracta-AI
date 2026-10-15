@@ -24,6 +24,7 @@ router.post("/github-test", async (req, res) => {
         docker: { present: true, hasCMD: true, exposesPort: true },
         kubernetes: { present: true, type: "raw" },
         cicd: { present: true },
+        security: { gitignorePresent: true, envFileTracked: false, dependencyLockPresent: true, securityMiddlewareDetected: true, exposedSecretPatterns: 0 },
         issues: [],
         summary: { productionReady: true, devOpsScore: 90, riskLevel: "low" }
       }

@@ -23,13 +23,14 @@ export function useRunLoadTest() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (data: { url: string; githubRepo?: string }) => {
+    mutationFn: async (data: { url: string; githubRepo?: string; scanAuthorization: boolean }) => {
       if (!token) throw new Error("Not authenticated");
 
       const result = await api.runLoadTest(
         token,
         data.url,
-        data.githubRepo
+        data.githubRepo,
+        data.scanAuthorization
       );
 
       if (result.error) {

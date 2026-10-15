@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Activity, ArrowLeft, ArrowRight, Lock, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { PublicNavigation } from '@/components/PublicShell';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -34,7 +35,8 @@ export default function Login() {
     };
 
     return (
-        <div className="dark bg-slate-950 text-slate-100 min-h-screen font-sans flex flex-col relative overflow-hidden">
+        <div className="public-premium min-h-screen font-sans flex flex-col relative overflow-hidden">
+            <PublicNavigation />
 
             {/* Grid background */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b1a_1px,transparent_1px),linear-gradient(to_bottom,#1e293b1a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none -z-20" />
@@ -43,7 +45,7 @@ export default function Login() {
             <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.05)_0,transparent_65%)] blur-[80px] pointer-events-none -z-10" />
 
             {/* Header */}
-            <header className="border-b border-slate-800/40 bg-slate-950/60 backdrop-blur-xl">
+            <header className="hidden border-b border-slate-800/40 bg-slate-950/60 backdrop-blur-xl">
                 <div className="container mx-auto px-6 h-18 py-4 flex items-center justify-between">
                     <Link href="/">
                         <div className="flex items-center gap-3 cursor-pointer group">

@@ -1,7 +1,12 @@
 const DEFAULT_API_URL = import.meta.env.DEV
     ? "http://localhost:8080/api"
     : "https://syncmind-ai.onrender.com/api";
-const API_URL = (import.meta.env.VITE_API_URL || DEFAULT_API_URL).replace(/\/$/, "");
+// Local development must use the local runner fixes. Production builds can use
+// VITE_API_URL to point at the deployed backend.
+const API_URL = (import.meta.env.DEV
+    ? DEFAULT_API_URL
+    : (import.meta.env.VITE_API_URL || DEFAULT_API_URL)
+).replace(/\/$/, "");
 const BACKEND_ROOT_URL = API_URL.replace(/\/api$/, "");
 const REQUEST_TIMEOUT_MS = 20000;
 const MAX_RETRIES = 2;
@@ -88,7 +93,9 @@ const request = async (
         return {
             error: isAbort
                 ? "Request timed out. Please try again."
-                : (error?.message || "Network error. Please try again."),
+                : isNetworkFailure
+                    ? `Cannot reach the local backend at ${BACKEND_ROOT_URL}. Start it with "cd backend && npm run dev", then try again.`
+                    : (error?.message || "Network error. Please try again."),
         };
     } finally {
         clearTimeout(timeoutId);
@@ -120,13 +127,13 @@ export const api = {
     },
 
     // Load Test
-    runLoadTest: async (token: string, testURL: string, githubRepo?: string) => {
+    runLoadTest: async (token: string, testURL: string, githubRepo?: string, scanAuthorization = false) => {
         return request('/load-test', {
             method: 'POST',
             headers: getHeaders(token),
-            body: JSON.stringify({ testURL, githubRepo })
+            body: JSON.stringify({ testURL, githubRepo, scanAuthorization })
         }, {
-            timeoutMs: 120000,
+            timeoutMs: 240000,
             maxRetries: 0,
         });
     },

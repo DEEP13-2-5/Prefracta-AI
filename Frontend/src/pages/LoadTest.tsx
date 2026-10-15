@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useRunLoadTest } from "@/hooks/use-load-test";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { Play, Loader2, Github, Globe } from "lucide-react";
+import { Play, Loader2, Github, Globe, ShieldCheck, Zap, Radar } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,6 +18,7 @@ export default function LoadTest() {
 
   const [url, setUrl] = useState("");
   const [repo, setRepo] = useState("");
+  const [scanAuthorization, setScanAuthorization] = useState(false);
 
   // Simulation State
   const [isSimulating, setIsSimulating] = useState(false);
@@ -33,7 +34,7 @@ export default function LoadTest() {
     // Initial delay for immediate UI feedback
     setTimeout(() => {
       runTest.mutate(
-        { url, githubRepo: repo || undefined },
+        { url, githubRepo: repo || undefined, scanAuthorization },
         {
           onSuccess: (data: any) => {
             console.log("✅ Load test triggered successfully:", data.id);
@@ -131,18 +132,17 @@ export default function LoadTest() {
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto py-12">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold font-display mb-2">Configure Load Test</h1>
-          <p className="text-muted-foreground">
-            Simulate traffic and analyze your infrastructure's resilience.
-          </p>
+      <div className="max-w-3xl mx-auto py-8 md:py-12">
+        <div className="mb-8">
+          <p className="text-xs font-bold uppercase tracking-[.16em] text-primary mb-3">New release assessment</p>
+          <h1 className="text-3xl font-bold mb-2">Choose what to assess</h1>
+          <p className="text-muted-foreground">We run observable checks against your staging environment and repository, then group the evidence in one report.</p>
         </div>
 
         <Card className="border-border shadow-xl">
-          <CardHeader>
-            <CardTitle>Test Parameters</CardTitle>
-            <CardDescription>Enter the target URL and GitHub repository for deeper analysis.</CardDescription>
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle>Assessment scope</CardTitle>
+            <CardDescription>Add a staging target and repository. The GitHub review is read-only.</CardDescription>
           </CardHeader>
           <CardContent>
             {isSimulating ? (
@@ -155,14 +155,14 @@ export default function LoadTest() {
                   <Loader2 className="w-12 h-12 animate-spin text-primary" />
                 </div>
                 <div className="text-center space-y-1">
-                  <h3 className="font-semibold text-lg">Simulating Traffic...</h3>
-                  <p className="text-sm text-muted-foreground">This may take a few minutes. Please wait.</p>
+                  <h3 className="font-semibold text-lg">Collecting assessment evidence...</h3>
+                  <p className="text-sm text-muted-foreground">Load, browser and repository checks are running in parallel.</p>
                 </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="url">Target URL</Label>
+                  <Label htmlFor="url">Staging target URL</Label>
                   <div className="relative">
                     <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -178,7 +178,7 @@ export default function LoadTest() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="repo">GitHub Repository URL</Label>
+                  <Label htmlFor="repo">GitHub repository URL</Label>
                   <div className="relative">
                     <Github className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -191,18 +191,21 @@ export default function LoadTest() {
                     />
                   </div>
                 </div>
-                <div className="space-y-6 mt-6"> {/* New wrapper div with space-y-6 and mt-6 */}
-                  <div className="bg-muted/50 p-4 rounded-lg text-sm text-muted-foreground">
-                    <p>
-                      <span className="font-semibold">Note:</span> {user?.subscription.plan === 'free' ? 'This will consume 1 credit from your balance.' : 'Infinite tests included in your plan.'}
-                      The test runs for approximately 5 seconds.
-                    </p>
+                <div className="space-y-6 mt-6">
+                  <div className="grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600 sm:grid-cols-3">
+                    <span className="flex items-center gap-2"><Zap className="h-4 w-4 text-blue-600" /> Load test</span><span className="flex items-center gap-2"><Radar className="h-4 w-4 text-blue-600" /> Browser audit</span><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-blue-600" /> Repo controls</span>
                   </div>
+                  <div className="rounded-lg bg-muted/50 p-4 text-sm text-muted-foreground"><p><span className="font-semibold">Usage:</span> {user?.subscription.plan === 'free' ? 'This assessment uses 1 credit.' : 'Unlimited assessments are included in your plan.'} Tests run only against the target you provide.</p>
+                  </div>
+                  <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-4 text-sm text-slate-600">
+                    <input type="checkbox" checked={scanAuthorization} onChange={(e) => setScanAuthorization(e.target.checked)} className="mt-1 h-4 w-4 accent-blue-600" />
+                    <span><strong className="text-slate-900">I own this target or have written authorization to test it.</strong><br />Prefracta will run passive security and browser checks against this staging/public URL.</span>
+                  </label>
 
                   <Button
                     type="submit"
                     className="w-full h-12 text-base font-semibold shadow-lg shadow-primary/20"
-                    disabled={runTest.isPending || !canStartTest}
+                    disabled={runTest.isPending || !canStartTest || !scanAuthorization}
                   >
                     {runTest.isPending ? (
                       <>
@@ -210,9 +213,11 @@ export default function LoadTest() {
                       </>
                     ) : !canStartTest ? (
                       "Buy credits to run test"
+                    ) : !scanAuthorization ? (
+                      "Confirm authorization to continue"
                     ) : (
                       <>
-                        <Play className="mr-2 h-5 w-5" /> Start Simulation
+                        <Play className="mr-2 h-5 w-5" /> Run assessment
                       </>
                     )}
                   </Button>

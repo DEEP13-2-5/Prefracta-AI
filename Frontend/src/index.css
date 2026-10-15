@@ -106,3 +106,15 @@ body {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-[hsl(var(--primary))] via-[hsl(var(--secondary))] to-[hsl(var(--accent))];
   }
 }
+
+/* Shared premium light surface for public marketing and auth pages. */
+.public-premium { background: #f7f8fa; color: #0f172a; }
+.public-premium .bg-slate-950, .public-premium .bg-slate-950\/60, .public-premium .bg-slate-950\/80 { background-color: #f7f8fa !important; }
+.public-premium .bg-slate-900, .public-premium .bg-slate-900\/30, .public-premium .bg-slate-900\/40, .public-premium .bg-slate-900\/50, .public-premium .bg-slate-900\/60, .public-premium .bg-slate-900\/70, .public-premium .bg-slate-900\/80 { background-color: #fff !important; }
+.public-premium .border-slate-800, .public-premium .border-slate-800\/40, .public-premium .border-slate-800\/60, .public-premium .border-slate-800\/80, .public-premium .border-slate-900 { border-color: #e2e8f0 !important; }
+.public-premium .text-white, .public-premium .text-slate-100, .public-premium .text-slate-200, .public-premium .text-slate-300 { color: #0f172a !important; }
+.public-premium .text-slate-400 { color: #475569 !important; }
+.public-premium .text-slate-500, .public-premium .text-slate-600, .public-premium .text-slate-700 { color: #64748b !important; }
+.public-premium .text-transparent { background-image: none !important; color: #2563eb !important; }
+.public-premium button.bg-slate-800, .public-premium button.bg-slate-900, .public-premium button.bg-slate-950 { background-color: #0f172a !important; color: #fff !important; border-color: #0f172a !important; }
+.public-premium button.bg-cyan-500 { background-color: #2563eb !important; color: #fff !important; border-color: #2563eb !important; }

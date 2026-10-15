@@ -11,9 +11,14 @@ import {
   User as UserIcon,
   Book,
   Tag,
+  ShieldCheck,
+  Github,
+  Radar,
+  Search,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { BrandMark } from "@/components/BrandMark";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -21,15 +26,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "New Load Test", href: "/load-test", icon: Zap },
+    { name: "Assessment overview", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Run assessment", href: "/load-test", icon: Zap },
+    { name: "Frontend audit", href: "/dashboard/frontend", icon: Radar },
+    { name: "Playwright audit", href: "/dashboard/playwright", icon: Search },
+    { name: "Security coverage", href: "/dashboard/security", icon: ShieldCheck },
+    { name: "Repository checks", href: "/dashboard/repository", icon: Github },
     { name: "Subscription", href: "/subscription", icon: CreditCard },
     ...(user?.subscription.plan === 'free' ? [{ name: "Pricing", href: "/pricing", icon: Tag }] : []),
     { name: "Documentation", href: "/docs", icon: Book },
   ];
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#f7f8fa] flex flex-col md:flex-row">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-4 border-b bg-card">
         <span className="text-xl font-bold font-display text-primary">Prefracta AI</span>
@@ -41,28 +50,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 flex flex-col",
+          "fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 flex flex-col",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="p-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <img src="/logo.png" alt="Prefracta AI" className="w-12 h-12 rounded-lg" />
-            <span className="text-xl font-bold font-display">Prefracta AI</span>
-          </Link>
+          <div><BrandMark href="/dashboard" /><span className="ml-[46px] block text-[10px] font-bold tracking-[.16em] text-slate-400">RELEASE INTELLIGENCE</span></div>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2 mt-4">
+        <nav className="flex-1 px-4 space-y-1 mt-7">
           {navigation.map((item) => {
             const isActive = location === item.href;
             return (
               <Link key={item.name} href={item.href}>
                 <div
                   className={cn(
-                    "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 cursor-pointer",
+                    "flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-all duration-200 cursor-pointer",
                     isActive
-                      ? "bg-primary/10 text-primary font-medium shadow-sm"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      ? "bg-slate-950 text-white font-semibold shadow-sm"
+                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-950"
                   )}
                 >
                   <item.icon size={20} />
@@ -76,7 +82,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-t border-border">
           {user ? (
             <>
-              <div className="bg-muted/30 rounded-xl p-4 mb-4">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 mb-4">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
                     <UserIcon size={16} />

@@ -9,6 +9,9 @@ const testSessionSchema = new mongoose.Schema({
     url: String,
     metrics: mongoose.Schema.Types.Mixed, // Stores parsed k6 metrics
     browserMetrics: mongoose.Schema.Types.Mixed, // Stores Playwright audit results
+    frontendAudit: mongoose.Schema.Types.Mixed,
+    securityAudit: mongoose.Schema.Types.Mixed,
+    scanAuthorization: mongoose.Schema.Types.Mixed,
     charts: mongoose.Schema.Types.Mixed,  // Stores chart data
     healthData: mongoose.Schema.Types.Mixed, // Stores pie chart health distribution
     github: mongoose.Schema.Types.Mixed,  // Stores GitHub analysis

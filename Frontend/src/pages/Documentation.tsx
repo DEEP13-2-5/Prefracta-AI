@@ -14,6 +14,7 @@ import {
     ChevronRight,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { PublicNavigation } from "@/components/PublicShell";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -106,7 +107,8 @@ export default function Documentation() {
     }, []);
 
     return (
-        <div className="dark bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-cyan-500/30 selection:text-cyan-300 relative overflow-x-hidden">
+        <div className="public-premium min-h-screen font-sans selection:bg-blue-100 selection:text-blue-950 relative overflow-x-hidden">
+            <PublicNavigation />
 
             {/* Tech grid background — identical to Landing */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b1a_1px,transparent_1px),linear-gradient(to_bottom,#1e293b1a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none -z-20" />
@@ -116,7 +118,7 @@ export default function Documentation() {
             <div className="absolute bottom-[10%] right-[-10%] w-[50vw] h-[50vw] bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.06)_0,transparent_65%)] blur-[80px] pointer-events-none -z-10" />
 
             {/* Header — exact same as Landing.tsx */}
-            <header className="sticky top-0 z-50 border-b border-slate-800/40 bg-slate-950/60 backdrop-blur-xl transition-all duration-300">
+            <header className="hidden sticky top-0 z-50 border-b border-slate-800/40 bg-slate-950/60 backdrop-blur-xl transition-all duration-300">
                 <div className="container mx-auto px-6 h-20 flex items-center justify-between">
 
                     <Link href="/">
@@ -191,9 +193,9 @@ export default function Documentation() {
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="text-4xl sm:text-6xl font-black tracking-tight leading-tight text-white"
                 >
-                    Master{" "}
+                    Product{" "}
                     <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent">
-                        Prefracta AI.
+                        documentation.
                     </span>
                 </motion.h1>
                 <motion.p
@@ -202,7 +204,7 @@ export default function Documentation() {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="mt-6 text-lg text-slate-400 leading-relaxed"
                 >
-                    Everything you need to run production-grade load tests, interpret AI verdicts, and ship with confidence.
+                    Practical guidance for configuring assessments, reviewing evidence, and integrating checks into your release process.
                 </motion.p>
             </section>
 
@@ -317,7 +319,7 @@ export default function Documentation() {
             </section>
 
             {/* Footer */}
-            <footer className="border-t border-slate-900 py-12 bg-slate-950">
+            <footer className="hidden border-t border-slate-900 py-12 bg-slate-950">
                 <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2.5">
                         <Activity className="w-4 h-4 text-cyan-500" />

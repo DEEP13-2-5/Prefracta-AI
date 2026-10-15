@@ -4,6 +4,7 @@ import { Check, ArrowRight, Activity, GitBranch, ExternalLink } from "lucide-rea
 import { useAuth } from "@/hooks/use-auth";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
+import { PublicNavigation } from "@/components/PublicShell";
 
 const plans = [
     {
@@ -72,7 +73,8 @@ export default function Pricing() {
     }, []);
 
     return (
-        <div className="dark bg-slate-950 text-slate-100 min-h-screen font-sans selection:bg-cyan-500/30 selection:text-cyan-300 relative overflow-x-hidden">
+        <div className="public-premium min-h-screen font-sans selection:bg-blue-100 selection:text-blue-950 relative overflow-x-hidden">
+            <PublicNavigation />
 
             {/* Tech grid background — identical to Landing */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b1a_1px,transparent_1px),linear-gradient(to_bottom,#1e293b1a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none -z-20" />
@@ -82,7 +84,7 @@ export default function Pricing() {
             <div className="absolute top-[40%] right-[-15%] w-[50vw] h-[50vw] bg-[radial-gradient(circle_at_center,rgba(139,92,246,0.06)_0,transparent_65%)] blur-[80px] pointer-events-none -z-10" />
 
             {/* Header — exact same as Landing.tsx */}
-            <header className="sticky top-0 z-50 border-b border-slate-800/40 bg-slate-950/60 backdrop-blur-xl transition-all duration-300">
+            <header className="hidden sticky top-0 z-50 border-b border-slate-800/40 bg-slate-950/60 backdrop-blur-xl transition-all duration-300">
                 <div className="container mx-auto px-6 h-20 flex items-center justify-between">
 
                     <Link href="/">
@@ -157,9 +159,9 @@ export default function Pricing() {
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="text-4xl sm:text-6xl font-black tracking-tight leading-tight text-white"
                 >
-                    Pay for what you{" "}
+                    Plans for every{" "}
                     <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent">
-                        actually use.
+                        release cycle.
                     </span>
                 </motion.h1>
                 <motion.p
@@ -168,7 +170,7 @@ export default function Pricing() {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="mt-6 text-lg text-slate-400 leading-relaxed"
                 >
-                    From solo developers to cross-functional DevOps teams — choose a plan that matches your release velocity.
+                    Clear plans for individual builders and teams that need dependable release evidence.
                 </motion.p>
             </section>
 
@@ -184,7 +186,7 @@ export default function Pricing() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.1 + idx * 0.1 }}
                                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                                className="flex flex-col"
+                                className="flex flex-col pt-4"
                             >
                                 <div
                                     className={`relative flex flex-col flex-1 rounded-2xl overflow-hidden border transition-all duration-300 ${
@@ -199,12 +201,12 @@ export default function Pricing() {
                                     )}
 
                                     {plan.popular && (
-                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-cyan-500 text-slate-950 text-[10px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase shadow-md shadow-cyan-500/20">
+                                        <div className="absolute top-4 left-1/2 z-10 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full tracking-widest uppercase shadow-sm">
                                             MOST POPULAR
                                         </div>
                                     )}
 
-                                    <div className="p-8 pt-10 flex flex-col flex-1">
+                                    <div className={`p-8 flex flex-col flex-1 ${plan.popular ? "pt-14" : "pt-8"}`}>
                                         {/* Plan name + desc */}
                                         <div className="mb-8">
                                             <h2 className={`text-lg font-bold tracking-tight ${plan.popular ? "text-cyan-400" : "text-slate-300"}`}>
@@ -278,7 +280,7 @@ export default function Pricing() {
             </section>
 
             {/* Footer */}
-            <footer className="border-t border-slate-900 py-12 bg-slate-950">
+            <footer className="hidden border-t border-slate-900 py-12 bg-slate-950">
                 <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div className="flex items-center gap-2.5">
                         <Activity className="w-4 h-4 text-cyan-500" />

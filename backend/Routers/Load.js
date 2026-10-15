@@ -7,6 +7,9 @@ import { analyzeGithubRepo } from "../Utils/githubAnalyzer.js";
 import getresponseopenrouter from "../Utils/openrouter.js";
 import { checkCreditsOrSub } from "../Middleware/authMiddleware.js";
 import TestSession from "../Models/TestSession.js";
+import { validateAuthorizedTarget } from "../Utils/scanAuthorization.js";
+import { runLighthouseAudit } from "../Runners/lighthouseRunner.js";
+import { runZapBaseline } from "../Runners/securityRunner.js";
 
 const router = express.Router();
 
@@ -38,21 +41,30 @@ const sanitizeSessionForClient = (session) => {
 };
 
 // Run Load Test -> POST /api/load-test
-router.post("/", checkCreditsOrSub, async (req, res) => {
+router.post("/", async (req, res, next) => {
+  if (!req.body?.testURL) return next();
   try {
-    const { testURL, githubRepo, sleepDuration } = req.body;
+    req.authorizedTargetUrl = await validateAuthorizedTarget(req.body.testURL, req.body.scanAuthorization);
+    next();
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+}, checkCreditsOrSub, async (req, res) => {
+  try {
+    const { testURL, githubRepo, sleepDuration, scanAuthorization } = req.body;
 
     if (!testURL && !githubRepo) {
       return res.status(400).json({ error: "Provide testURL or githubRepo" });
     }
+    const authorizedUrl = req.authorizedTargetUrl || testURL;
 
 
     // console.log("⏱ Starting synchronized analysis (K6 + GitHub)...");
 
     // Run all in parallel to save time and avoid timeouts
-    const [testResult, githubResult, playwrightResult] = await Promise.all([
-      testURL
-        ? runK6Test(testURL, { vus: 200, duration: "5s", sleepDuration }).catch(e => {
+    const [testResult, githubResult, playwrightResult, frontendAudit, securityAudit] = await Promise.all([
+      authorizedUrl
+        ? runK6Test(authorizedUrl, { vus: 200, duration: "5s", sleepDuration }).catch(e => {
           console.error("⚠️ K6 Test Failed:", e);
           return null;
         })
@@ -63,12 +75,17 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
           return null;
         })
         : Promise.resolve(null),
-      testURL
-        ? runPlaywrightAudit(testURL).catch(e => {
+      authorizedUrl
+        ? runPlaywrightAudit(authorizedUrl).catch(e => {
           console.error("⚠️ Playwright Audit Failed:", e);
           return null;
         })
-        : Promise.resolve(null)
+        : Promise.resolve(null),
+      authorizedUrl ? runLighthouseAudit(authorizedUrl).catch(e => {
+        console.error("⚠️ Lighthouse Audit Failed:", e);
+        return null;
+      }) : Promise.resolve(null),
+      authorizedUrl ? runZapBaseline(authorizedUrl) : Promise.resolve(null)
     ]);
 
 
@@ -134,6 +151,20 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
       context += `- Docker: ${githubResult.docker.present ? "Detected" : "Not detected"}\n`;
       context += `- CI/CD: ${githubResult.cicd.present ? "Detected" : "Not detected"}\n`;
       context += `- Kubernetes: ${githubResult.kubernetes.present ? "Detected" : "Not detected"}\n\n`;
+      if (githubResult.security) {
+        context += `- Dependency lockfile: ${githubResult.security.dependencyLockPresent ? "Detected" : "Not detected"}\n`;
+        context += `- Environment file in repository: ${githubResult.security.envFileTracked ? "Detected" : "Not detected"}\n`;
+        context += `- Potential hard-coded credential patterns: ${githubResult.security.exposedSecretPatterns || 0}\n\n`;
+      }
+      if (githubResult.quality || githubResult.deployment || githubResult.project) {
+        context += `Repository Engineering Review:\n`;
+        context += `- Languages: ${(githubResult.project?.languages || []).join(", ") || "Unknown"}\n`;
+        context += `- Source files: ${githubResult.project?.sourceFileCount || 0}; test files: ${githubResult.project?.testFileCount || 0}\n`;
+        context += `- README: ${githubResult.quality?.readmePresent ? "present" : "missing"}; license: ${githubResult.quality?.licensePresent ? "present" : "missing"}\n`;
+        context += `- Tests: ${githubResult.quality?.testsPresent ? "detected" : "not detected"}; build: ${githubResult.quality?.buildScriptPresent ? "present" : "missing"}; lint: ${githubResult.quality?.lintScriptPresent ? "present" : "missing"}\n`;
+        context += `- Health check: ${githubResult.quality?.healthCheckPresent || githubResult.deployment?.healthcheckPresent ? "detected" : "not detected"}; observability: ${githubResult.quality?.observabilityPresent ? "detected" : "not detected"}\n`;
+        context += `- Deployment config: ${githubResult.deployment?.deploymentConfigPresent ? "detected" : "not detected"}; infrastructure as code: ${githubResult.deployment?.infrastructureAsCodePresent ? "detected" : "not detected"}\n\n`;
+      }
     } else {
       context += `Repository Signals: Not available (no repository provided)\n\n`;
     }
@@ -149,6 +180,12 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
         context += `- Real Browser Load Time: ${playwrightResult.loadTimeMs} ms\n`;
       }
       context += `\n`;
+    }
+    if (frontendAudit?.status === "complete") {
+      context += `Frontend Audit (Lighthouse):\n- Performance: ${frontendAudit.scores.performance}/100\n- Accessibility: ${frontendAudit.scores.accessibility}/100\n- LCP: ${frontendAudit.webVitals.lcpMs ?? "N/A"} ms\n\n`;
+    }
+    if (securityAudit?.status === "complete") {
+      context += `Passive Security Audit (OWASP ZAP):\n- Findings: ${securityAudit.findings.length}\n- Mode: passive baseline only\n\n`;
     }
 
     const businessMetrics = {
@@ -262,15 +299,16 @@ router.post("/", checkCreditsOrSub, async (req, res) => {
           {
             role: "system",
             content: `
-You are Prefracta AI, an Automated Strategic Auditor. Your tone is clinical, professional, and precise.
+You are Prefracta AI, an Automated System Auditor. Explain results to a product owner who may not be technical.
 
-Your purpose is to provide a comprehensive AUTOMATED AUDIT based on **k6 Load Tests**, **DevOps Signals**, and **Playwright Audits**.
+Your purpose is to provide a clear, useful audit based on **k6 Load Tests**, **repository signals**, **Playwright browser checks**, Lighthouse, and passive security checks.
 
 STRICT RULES:
-1. IDENTITY: Always refer to this as an "Automated System Audit."
-2. TONE: Objective and authoritative. 
-3. FORMAT: Focus on high-level architecture and business impact.
-4. LIMIT: Do not offer chat-like interaction here. This is a one-way audit report.
+1. Keep the language simple. Define technical terms in plain words the first time: for example, "p95 latency means the response time experienced by the slowest 5% of requests."
+2. Never use unexplained formulas, dramatic claims, fake precision, or complicated architecture language.
+3. Use short paragraphs and bullets. Each paragraph must be no more than two sentences.
+4. Always separate observed facts from estimates or recommendations.
+5. Do not offer chat-like interaction here. This is a one-way audit report.
         `.trim()
           },
           {
@@ -278,18 +316,23 @@ STRICT RULES:
             content: `
 ${safeContext}
 
-Generate the "Harsh Reality Executive Summary" strictly in this format:
+Generate a short "Automated System Audit" strictly in this format:
 
-**Prefracta AI Verdict**
+**Overall result**
 
-[The Business Reality]
-Map only the observed technical signals to business risk. Use cautious language such as "estimated", "may", and "risk". Do not cite industry data or exact revenue loss unless it is present in the context.
+[2-3 simple sentences explaining whether the evidence looks ready, needs review, or is incomplete. Mention the strongest evidence and the biggest concern.]
 
-[The Actionable Remediation]
-Provide specific technical fixes that lead to business gains. Format as: "Add [Feature] -> [Business Benefit]".
+**What the numbers mean**
 
-[The Collapse Point]
-State the estimated load threshold from the provided metrics. Do not claim permanent blackout or hardware failure; frame it as a capacity-risk estimate.
+[Use 2-4 bullets. Explain throughput, p95 latency, failure rate, browser scores, repository checks, or security findings only when present. Translate each into a user-facing meaning.]
+
+**Top actions**
+
+[Give at most three actions. Format each as: "- Fix: [plain technical action]. Why: [plain business or user benefit]."]
+
+**Important limitation**
+
+[State that this is evidence from one assessment run, that passive security checks are not a penetration test, and that any capacity threshold is only an estimate.]
 
 STRICT REPRODUCTION RULE: Do NOT include labels like "Paragraph 1", "Paragraph 2", or "Paragraph 3" in your output. Just provide the text.
         `.trim()
@@ -333,6 +376,9 @@ STRICT REPRODUCTION RULE: Do NOT include labels like "Paragraph 1", "Paragraph 2
       url: testURL || githubRepo,
       metrics,
       browserMetrics: playwrightResult,
+      frontendAudit,
+      securityAudit,
+      scanAuthorization: { confirmed: true, mode: "passive", confirmedAt: new Date() },
       charts,
       github,
       ai: aiPayload,
@@ -357,6 +403,8 @@ STRICT REPRODUCTION RULE: Do NOT include labels like "Paragraph 1", "Paragraph 2
       id: sessionId,
       metrics,
       browserMetrics: newSession?.browserMetrics || playwrightResult,
+      frontendAudit,
+      securityAudit,
       charts,
       github,
       ai: aiPayload,
@@ -400,6 +448,8 @@ router.get("/latest", async (req, res) => {
         url: sanitized.url,
         metrics: sanitized.metrics,
         browserMetrics: sanitized.browserMetrics,
+        frontendAudit: sanitized.frontendAudit,
+        securityAudit: sanitized.securityAudit,
         charts: sanitized.charts,
         github: sanitized.github,
         ai: sanitized.ai,
@@ -426,6 +476,8 @@ router.get("/:id", async (req, res) => {
       url: sanitized.url,
       metrics: sanitized.metrics,
       browserMetrics: sanitized.browserMetrics,
+      frontendAudit: sanitized.frontendAudit,
+      securityAudit: sanitized.securityAudit,
       charts: sanitized.charts,
       github: sanitized.github,
       ai: sanitized.ai,
